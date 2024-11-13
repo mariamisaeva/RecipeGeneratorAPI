@@ -1,1 +1,1 @@
-import { DataSource } from 'typeor
+import { DataSource } from 'typeo
