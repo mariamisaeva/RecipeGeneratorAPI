@@ -26,5 +26,7 @@ export const AppDataSource = new DataSource({
 
 async function initializeDatabase() {
   try {
-  } catch (err) {}
+  } catch (err) {
+    console.log('Error connecting to the database:', err);
+  }
 }
