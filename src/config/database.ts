@@ -15,5 +15,6 @@ export const AppDataSource = new DataSource({
   port: Number(process.env.DB_PORT),
   username: ,
     password: ,
+    database: ,
 
 });
