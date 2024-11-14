@@ -32,3 +32,5 @@ async function initializeDatabase() {
     console.log('Error connecting to the database:', err);
   }
 }
+
+initializeDatabase();
