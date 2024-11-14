@@ -22,7 +22,6 @@ export const AppDataSource = new DataSource({
   logging: false, // set to TRUE to see the SQL queries in the console
 });
 
-//THEN..CATCH
 AppDataSource.initialize()
   .then(() => {
     console.log('Database connected successfully');
@@ -32,7 +31,6 @@ AppDataSource.initialize()
   });
 
 //ASYNC..AWAIT
-//TRY..CATCH
 // async function initializeDatabase() {
 //   try {
 //     await AppDataSource.initialize();
