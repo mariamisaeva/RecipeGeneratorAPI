@@ -23,16 +23,21 @@ export const AppDataSource = new DataSource({
 });
 
 //THEN..CATCH
+AppDataSource.initialize()
+  .then()
+  .catch((err) => {
+    console.log('Error connecting to the database:', err);
+  });
 
 //ASYNC..AWAIT
 //TRY..CATCH
-async function initializeDatabase() {
-  try {
-    await AppDataSource.initialize();
-    console.log('Database connected successfully');
-  } catch (err) {
-    console.log('Error connecting to the database:', err);
-  }
-}
+// async function initializeDatabase() {
+//   try {
+//     await AppDataSource.initialize();
+//     console.log('Database connected successfully');
+//   } catch (err) {
+//     console.log('Error connecting to the database:', err);
+//   }
+// }
 
-initializeDatabase();
+// initializeDatabase();
