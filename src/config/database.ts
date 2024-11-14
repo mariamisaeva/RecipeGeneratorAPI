@@ -21,3 +21,10 @@ export const AppDataSource = new DataSource({
   // set to FALSE in production to avoid data loss
   logging: false, // set to TRUE to see the SQL queries in the console
 });
+
+//
+
+async function initializeDatabase() {
+  try {
+  } catch (err) {}
+}
