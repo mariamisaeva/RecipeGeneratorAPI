@@ -16,5 +16,6 @@ export const AppDataSource = new DataSource({
   username: ,
     password: ,
     database: ,
+    entities: ,
 
 });
