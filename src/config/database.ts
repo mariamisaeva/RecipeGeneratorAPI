@@ -19,4 +19,5 @@ export const AppDataSource = new DataSource({
   entities: [],
   synchronize: true, // this will auto create tables based on the entities
   // set to FALSE in production to avoid data loss
-  
+  logging: false,
+});
