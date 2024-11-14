@@ -18,5 +18,6 @@ export const AppDataSource = new DataSource({
     database: ,
     entities: ,
     synchronize: ,
-
+    logging: ,
+    
 });
