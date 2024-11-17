@@ -5,7 +5,11 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "experimentalDecorators": true,
+
+    "emitDecoratorMetadata": true,
+    "forceConsistentCasingInFileNames": true // This is for case sensitive file system
   },
   "include": ["src"],
   "exclude": ["node_modules"]
