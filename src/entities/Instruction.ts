@@ -22,6 +22,5 @@ export class Instruction {
   recipeId!: number;
 
   @ManyToMany(() => Recipe, (recipe) => recipe.instructions)
-  //   @JoinTable()
   recipes!: Recipe[];
 }
