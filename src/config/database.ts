@@ -1,13 +1,10 @@
 import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
+import { Recipe } from '../entities/Recipe';
+import { Instruction } from '../entities/Instruction';
 dotenv.config();
 
 const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
-console.log(DB_HOST);
-console.log(DB_PORT);
-console.log(DB_NAME);
-console.log(DB_PASSWORD);
-console.log(DB_USER);
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -16,18 +13,20 @@ export const AppDataSource = new DataSource({
   username: DB_USER,
   password: DB_PASSWORD,
   database: DB_NAME,
-  entities: [],
+  entities: [Recipe, Instruction], //schemas
   synchronize: true, // this will auto create tables based on the entities
   // set to FALSE in production to avoid data loss
   logging: false, // set to TRUE to see the SQL queries in the console
+  migrations: [],
+  subscribers: [],
 });
 
-AppDataSource.initialize()
+export const dbConnection = AppDataSource.initialize()
   .then(() => {
-    console.log('Database connected successfully');
+    console.log(' ✅ Database connected successfully');
   })
   .catch((err) => {
-    console.log('Error connecting to the database:', err);
+    console.log(' ❌ Error connecting to the database:', err);
   });
 
 //ASYNC..AWAIT
