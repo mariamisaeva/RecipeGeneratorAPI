@@ -40,6 +40,6 @@ export class Recipe {
   ingredients!: string;
 
   @ManyToMany(() => Instruction, (step) => step.recipes)
-  //   @JoinTable()
+  @JoinTable()
   instructions!: Instruction[];
 }
