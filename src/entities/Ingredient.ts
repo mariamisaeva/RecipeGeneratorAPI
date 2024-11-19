@@ -6,7 +6,7 @@ export class Ingredient {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({ unique: true })
   name!: string;
 
   @OneToMany(() => RecipeIngredient, (ri) => ri.ingredient) //ingredient in RecipeIngredient
