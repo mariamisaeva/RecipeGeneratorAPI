@@ -7,6 +7,7 @@ import {
   OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
 import { Instruction } from './Instruction';
 import { RecipeIngredient } from './RecipeIngredient';
@@ -52,6 +53,6 @@ export class Recipe {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @ManyToOne(() => User, (u) => u.recipes)
+  @ManyToOne(() => User, (u) => u.recipes, { onDelete: 'CASCADE' })
   author!: User; //User who created the recipe
 }
