@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Recipe } from './Recipe';
+import { RecipeIngredient } from './RecipeIngredient';
 
 @Entity()
 export class Ingredient {
@@ -8,4 +8,7 @@ export class Ingredient {
 
   @Column()
   name!: string;
+
+  @OneToMany(() => RecipeIngredient, (ri) => ri.ingredient) //ingredient in RecipeIngredient
+  recipeIngredients!: RecipeIngredient[];
 }

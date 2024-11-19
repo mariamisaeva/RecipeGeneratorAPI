@@ -9,11 +9,12 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Instruction } from './Instruction';
+import { RecipeIngredient } from './RecipeIngredient';
 
 @Entity()
 export class Recipe {
   @PrimaryGeneratedColumn()
-  id!: number; 
+  id!: number; //Primary key
 
   @Column()
   title!: string;
@@ -36,7 +37,8 @@ export class Recipe {
   @Column({ default: 'other' })
   category!: string;
 
-  @OneToMany(() => RecipeIngredient, (ri) => ri.recipe)
+  //OneToMany relationship with RecipeIngredient
+  @OneToMany(() => RecipeIngredient, (ri) => ri.recipe) //recipe in RecipeIngredient
   recipeIngredients!: RecipeIngredient[];
 
   @ManyToMany(() => Instruction, (step) => step.recipes)
@@ -46,12 +48,9 @@ export class Recipe {
   @CreateDateColumn()
   createdAt!: Date;
 
-  @UpdateDateColumn();
+  @UpdateDateColumn()
   updatedAt!: Date;
 
   @Column()
-  author!: string;
+  author!: string; //User who created the recipe (No table for User yet)
 }
-
-//createdAt: Date;
-//updatedAt: Date;
