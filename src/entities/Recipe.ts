@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Instruction } from './Instruction';
 import { RecipeIngredient } from './RecipeIngredient';
+import { User } from './User';
 
 @Entity()
 export class Recipe {
@@ -51,6 +52,6 @@ export class Recipe {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @Column()
-  author!: string; //User who created the recipe (No table for User yet)
+  @ManyToOne(() => User, (u) => u.recipes)
+  author!: User; //User who created the recipe
 }
