@@ -4,13 +4,16 @@ import {
   PrimaryGeneratedColumn,
   ManyToMany,
   JoinTable,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Instruction } from './Instruction';
 
 @Entity()
 export class Recipe {
   @PrimaryGeneratedColumn()
-  id!: number;
+  id!: number; 
 
   @Column()
   title!: string;
@@ -33,13 +36,22 @@ export class Recipe {
   @Column({ default: 'other' })
   category!: string;
 
-  @Column()
-  author!: string;
-
-  @Column()
-  ingredients!: string;
+  @OneToMany(() => RecipeIngredient, (ri) => ri.recipe)
+  recipeIngredients!: RecipeIngredient[];
 
   @ManyToMany(() => Instruction, (step) => step.recipes)
   @JoinTable()
   instructions!: Instruction[];
+
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn();
+  updatedAt!: Date;
+
+  @Column()
+  author!: string;
 }
+
+//createdAt: Date;
+//updatedAt: Date;
