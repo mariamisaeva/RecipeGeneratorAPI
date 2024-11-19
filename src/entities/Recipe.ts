@@ -37,6 +37,8 @@ export class Recipe {
   author!: string;
 
   @OneToMany(() => RecipeIngredient, (ri) => ri.recipe)
+  recipeIngredients!: RecipeIngredient[];
+
   @ManyToMany(() => Instruction, (step) => step.recipes)
   @JoinTable()
   instructions!: Instruction[];
