@@ -36,10 +36,11 @@ export class Recipe {
   @Column()
   author!: string;
 
-  @Column()
-  ingredients!: string;
-
+  @OneToMany(() => RecipeIngredient, (ri) => ri.recipe)
   @ManyToMany(() => Instruction, (step) => step.recipes)
   @JoinTable()
   instructions!: Instruction[];
 }
+
+//createdAt: Date;
+//updatedAt: Date;
