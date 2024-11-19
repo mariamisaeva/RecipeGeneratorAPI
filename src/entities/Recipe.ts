@@ -21,11 +21,11 @@ export class Recipe {
   @Column({ default: false })
   isVegetarian!: boolean;
 
-  @Column()
-  time!: string;
-
   @Column({ default: 1 })
   servings!: number;
+
+  @Column()
+  time!: string;
 
   @Column({ default: 'no-image.png' })
   image!: string;
