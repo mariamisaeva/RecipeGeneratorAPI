@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
 } from 'typeorm';
-import { Instruction } from './Instruction';
+import { RecipeInstruction } from './RecipeInstruction';
 import { RecipeIngredient } from './RecipeIngredient';
 import { User } from './User';
 import { FavoriteRecipe } from './FavoriteRecipe';
@@ -44,9 +44,8 @@ export class Recipe {
   @OneToMany(() => RecipeIngredient, (ri) => ri.recipe) //recipe in RecipeIngredient
   recipeIngredients!: RecipeIngredient[];
 
-  @ManyToMany(() => Instruction, (step) => step.recipes)
-  @JoinTable()
-  instructions!: Instruction[];
+  @OneToMany(() => RecipeInstruction, (step) => step.recipe)
+  recipeInstructions!: RecipeInstruction[];
 
   @CreateDateColumn()
   createdAt!: Date;
@@ -61,5 +60,5 @@ export class Recipe {
   favCounter!: number;
 
   @OneToMany(() => FavoriteRecipe, (fr) => fr.recipe)
-  favoritedBy: FavoriteRecipe[] = [];
+  favoritedBy!: FavoriteRecipe[];
 }

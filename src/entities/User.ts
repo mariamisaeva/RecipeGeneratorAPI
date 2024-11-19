@@ -29,5 +29,5 @@ export class User {
   createdAt!: Date;
 
   @OneToMany(() => FavoriteRecipe, (fr) => fr.user)
-  favoriteRecipes: FavoriteRecipe[] = [];
+  favoriteRecipes!: FavoriteRecipe[];
 }
