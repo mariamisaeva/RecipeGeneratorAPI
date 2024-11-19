@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 import { Recipe } from './Recipe';
+import { FavoriteRecipe } from './FavoriteRecipe';
 
 @Entity()
 export class User {
@@ -26,4 +27,7 @@ export class User {
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  @OneToMany(() => FavoriteRecipe, (fr) => fr.user)
+  favoriteRecipes: FavoriteRecipe[] = [];
 }

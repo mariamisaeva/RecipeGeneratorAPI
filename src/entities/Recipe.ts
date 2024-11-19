@@ -12,6 +12,7 @@ import {
 import { Instruction } from './Instruction';
 import { RecipeIngredient } from './RecipeIngredient';
 import { User } from './User';
+import { FavoriteRecipe } from './FavoriteRecipe';
 
 @Entity()
 export class Recipe {
@@ -55,4 +56,10 @@ export class Recipe {
 
   @ManyToOne(() => User, (u) => u.recipes, { onDelete: 'CASCADE' })
   author!: User; //User who created the recipe
+
+  @Column({ default: 0 })
+  favCounter!: number;
+
+  @OneToMany(() => FavoriteRecipe, (fr) => fr.recipe)
+  favoritedBy: FavoriteRecipe[] = [];
 }

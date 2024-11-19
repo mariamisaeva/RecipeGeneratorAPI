@@ -6,14 +6,11 @@ export class Instruction {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
-  stepNumber!: number;
+  //   @Column()
+  //   stepNumber!: number;
 
   @Column()
   step!: string;
-
-  @Column()
-  recipeId!: number;
 
   @ManyToMany(() => Recipe, (recipe) => recipe.instructions)
   recipes!: Recipe[];
