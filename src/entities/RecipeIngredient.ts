@@ -7,7 +7,7 @@ export class RecipeIngredient {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => Recipe, (r) => r.recipeIngredients, { onDelete: 'CASCADE' }) //rows in this table are removed when a recipe is deleted
+  @ManyToOne(() => Recipe, (r) => r.ingredients, { onDelete: 'CASCADE' }) //rows in this table are removed when a recipe is deleted
   recipe!: Recipe;
 
   @ManyToOne(() => Ingredient, (i) => i.recipeIngredients) //no cascade-delete ingredients to prevent accidental deletion
