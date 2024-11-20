@@ -1,8 +1,9 @@
 import express from 'express';
 import { dbConnection } from './config/database';
 import dotenv from 'dotenv';
-// import cors from 'cors';
 dotenv.config();
+import recipeRoutes from './routes/recipeRoutes';
+// import cors from 'cors';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -10,7 +11,7 @@ const PORT = process.env.PORT || 4000;
 app.use(express.json());
 
 //api routes
-// app.use('/recipes-api', recipesRoutes);
+app.use('/api/recipes', recipeRoutes);
 
 dbConnection
   .then(() => {
