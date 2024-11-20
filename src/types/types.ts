@@ -6,6 +6,6 @@ export interface Recipe_TS {
   time: string;
   image?: string;
   category?: string;
-  recipeIngredients: string[];
-  recipeInstructions: string[];
+  //   recipeIngredients: string[];
+  //   recipeInstructions: string[];
 }
