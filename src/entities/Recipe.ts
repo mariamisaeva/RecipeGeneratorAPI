@@ -42,10 +42,10 @@ export class Recipe {
 
   //OneToMany relationship with RecipeIngredient
   @OneToMany(() => RecipeIngredient, (ri) => ri.recipe) //recipe in RecipeIngredient
-  recipeIngredients!: RecipeIngredient[];
+  ingredients!: RecipeIngredient[];
 
   @OneToMany(() => RecipeInstruction, (step) => step.recipe)
-  recipeInstructions!: RecipeInstruction[];
+  instructions!: RecipeInstruction[];
 
   @CreateDateColumn()
   createdAt!: Date;

@@ -10,7 +10,7 @@ export class RecipeInstruction {
   @Column()
   stepNumber!: number;
 
-  @ManyToOne(() => Recipe, (r) => r.recipeInstructions)
+  @ManyToOne(() => Recipe, (r) => r.instructions)
   recipe!: Recipe;
 
   @ManyToOne(() => Instruction, (i) => i.recipeInstructions)
