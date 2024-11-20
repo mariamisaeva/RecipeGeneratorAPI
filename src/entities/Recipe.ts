@@ -7,13 +7,17 @@ import {
   OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
-import { Instruction } from './Instruction';
+import { RecipeInstruction } from './RecipeInstruction';
+import { RecipeIngredient } from './RecipeIngredient';
+import { User } from './User';
+import { FavoriteRecipe } from './FavoriteRecipe';
 
 @Entity()
 export class Recipe {
   @PrimaryGeneratedColumn()
-  id!: number; 
+  id!: number; //Primary key
 
   @Column()
   title!: string;
@@ -36,22 +40,25 @@ export class Recipe {
   @Column({ default: 'other' })
   category!: string;
 
-  @OneToMany(() => RecipeIngredient, (ri) => ri.recipe)
+  //OneToMany relationship with RecipeIngredient
+  @OneToMany(() => RecipeIngredient, (ri) => ri.recipe) //recipe in RecipeIngredient
   recipeIngredients!: RecipeIngredient[];
 
-  @ManyToMany(() => Instruction, (step) => step.recipes)
-  @JoinTable()
-  instructions!: Instruction[];
+  @OneToMany(() => RecipeInstruction, (step) => step.recipe)
+  recipeInstructions!: RecipeInstruction[];
 
   @CreateDateColumn()
   createdAt!: Date;
 
-  @UpdateDateColumn();
+  @UpdateDateColumn()
   updatedAt!: Date;
 
-  @Column()
-  author!: string;
-}
+  @ManyToOne(() => User, (u) => u.recipes, { onDelete: 'CASCADE' })
+  author!: User; //User who created the recipe
 
-//createdAt: Date;
-//updatedAt: Date;
+  @Column({ default: 0 })
+  favCounter!: number;
+
+  @OneToMany(() => FavoriteRecipe, (fr) => fr.recipe)
+  favoritedBy!: FavoriteRecipe[];
+}
