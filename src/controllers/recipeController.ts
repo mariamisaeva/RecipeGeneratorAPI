@@ -129,7 +129,30 @@ const getRecipeById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     console.log(id); ////
-    res.status(200).json({ success: true, message: 'Getting recipe by id...' });
+
+    const recipeRepository = AppDataSource.getRepository(Recipe);
+
+    const recipe = await recipeRepository.findOne({
+      where: { id: Number(id) },
+      relations: [
+        'ingredients',
+        'ingredients.ingredient',
+        'instructions',
+        'instructions.instruction',
+      ],
+    });
+
+    console.log(recipe); ////
+
+    if (!recipe) {
+      res.status(404).json({ success: false, message: 'Recipe not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Getting recipe by id...',
+      data: recipe,
+    });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
   }
