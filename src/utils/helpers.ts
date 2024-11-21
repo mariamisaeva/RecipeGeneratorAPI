@@ -1,0 +1,83 @@
+import { AppDataSource } from '../config/database';
+import { Ingredient_TS, Instruction_TS } from '../types/types';
+import { Ingredient } from '../entities/Ingredient';
+import { RecipeIngredient } from '../entities/RecipeIngredient';
+import { Instruction } from '../entities/Instruction';
+import { RecipeInstruction } from '../entities/RecipeInstruction';
+
+/* Process ingredients and return RecipeIngredient array.
+- grab repos
+- create an empty array type RecipeIngredient[]
+- loop through ingredients
+- grab the ingredient fineOne by name
+
+- create new recipe in the repo with destructured data
+- add to array
+- return
+*/
+
+//Ingredient - RecipeIngredient
+export const handleIngredients = async (
+  ingredients: Ingredient_TS[],
+): Promise<RecipeIngredient[]> => {
+  const ingredientsRepository = AppDataSource.getRepository(Ingredient);
+  const recipeIngredientRepository =
+    AppDataSource.getRepository(RecipeIngredient);
+
+  const newIngredients: RecipeIngredient[] = [];
+
+  for (const { name, quantity, unit } of ingredients) {
+    let singleIngredient = await ingredientsRepository.findOneBy({ name });
+
+    if (!singleIngredient) {
+      singleIngredient = ingredientsRepository.create({ name });
+      await ingredientsRepository.save(singleIngredient);
+    }
+
+    //create RI object
+    const RIng = recipeIngredientRepository.create({
+      ingredient: singleIngredient,
+      quantity,
+      unit,
+    });
+
+    newIngredients.push(RIng);
+  }
+
+  return newIngredients;
+};
+
+//Instruction - RecipeInstruction
+export const handleInstructions = async (
+  instructions: Instruction_TS[],
+): Promise<RecipeInstruction[]> => {
+  //TODO
+  //pass in instructions //grab repos //create an empty array type RecipeInstruction[] // define a stepNumber starts from 1  //loop through instructions // findOneBy //not exists: create and save it //create new recipe object in the jointRepo with destructured data //push to array + increment num //return
+
+  const instructionsRepository = AppDataSource.getRepository(Instruction);
+  const recipeInstructionRepository =
+    AppDataSource.getRepository(RecipeInstruction);
+
+  const newInstructions: RecipeInstruction[] = [];
+
+  let stepNumber = 1;
+
+  for (const { step } of instructions) {
+    let singleInstruction = await instructionsRepository.findOneBy({ step });
+
+    if (!singleInstruction) {
+      singleInstruction = instructionsRepository.create({ step });
+      await instructionsRepository.save(singleInstruction);
+    }
+
+    const RIns = recipeInstructionRepository.create({
+      instruction: singleInstruction, //instruction in RecipeInstruction
+      stepNumber,
+    });
+
+    newInstructions.push(RIns);
+    stepNumber++;
+  }
+
+  return newInstructions;
+};
