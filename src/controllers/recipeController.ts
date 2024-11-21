@@ -9,7 +9,22 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
 
   try {
     const recipeRepository = AppDataSource.getRepository(Recipe);
-    const fetchAllRecipes = await recipeRepository.find();
+    const fetchAllRecipes = await recipeRepository.find({
+      relations: [
+        'ingredients',
+        'ingredients.ingredient',
+        'instructions',
+        'instructions.instruction',
+      ],
+      order: {
+        id: 'ASC', //sort by id in recipes ascending
+        instructions: {
+          stepNumber: 'ASC', //sort by stepNumber in instructions ascending}
+        },
+      },
+    });
+
+    console.log(fetchAllRecipes); ////
 
     res.status(200).json({
       success: true,
@@ -53,9 +68,6 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
 
     const recipeRepository = AppDataSource.getRepository(Recipe);
 
-    const ingredientsHelper = await handleIngredients(ingredients);
-    const instructionsHelper = await handleInstructions(instructions);
-
     const newRecipe = recipeRepository.create({
       title,
       description,
@@ -64,16 +76,33 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
       time,
       image,
       category,
-      ingredients: ingredientsHelper,
-      instructions: instructionsHelper,
     });
 
     await recipeRepository.save(newRecipe);
 
+    await handleIngredients(ingredients, newRecipe);
+    await handleInstructions(instructions, newRecipe);
+
+    // console.log('Ingredients: ', ings); ////
+    // console.log('Instructions: ', insts); ////
+    // console.log('NEW RECIPE: ', newRecipe); ////
+
+    const fullNewRecipe = await recipeRepository.findOne({
+      where: { id: newRecipe.id },
+      relations: [
+        'ingredients',
+        'ingredients.ingredient',
+        'instructions',
+        'instructions.instruction',
+      ],
+    });
+
+    console.log(fullNewRecipe);
+
     res.status(201).json({
       success: true,
       message: 'Recipe created successfully',
-      data: newRecipe,
+      data: fullNewRecipe,
     });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });

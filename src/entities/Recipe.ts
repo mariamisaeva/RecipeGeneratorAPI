@@ -44,7 +44,7 @@ export class Recipe {
   @OneToMany(() => RecipeIngredient, (ri) => ri.recipe) //recipe in RecipeIngredient
   ingredients!: RecipeIngredient[];
 
-  @OneToMany(() => RecipeInstruction, (step) => step.recipe)
+  @OneToMany(() => RecipeInstruction, (inst) => inst.recipe)
   instructions!: RecipeInstruction[];
 
   @CreateDateColumn()
