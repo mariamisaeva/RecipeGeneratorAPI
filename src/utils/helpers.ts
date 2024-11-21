@@ -28,6 +28,8 @@ export const handleIngredients = async (
 
   const newIngredients: RecipeIngredient[] = [];
 
+  let indexNumber = 0;
+
   for (const { name, quantity, unit } of ingredients) {
     let singleIngredient = await ingredientsRepository.findOneBy({ name });
 
@@ -42,10 +44,12 @@ export const handleIngredients = async (
       quantity,
       unit,
       recipe, //link to the recipe (to be retrieved correctly)
+      indexNumber,
     });
 
     await recipeIngredientRepository.save(RIng);
     newIngredients.push(RIng);
+    indexNumber++;
   }
 
   return newIngredients;

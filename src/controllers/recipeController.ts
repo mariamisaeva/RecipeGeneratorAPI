@@ -18,6 +18,9 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
       ],
       order: {
         id: 'ASC', //sort by id in recipes ascending
+        ingredients: {
+          indexNumber: 'ASC', //sort by orderIndex in ingredients
+        },
         instructions: {
           stepNumber: 'ASC', //sort by stepNumber in instructions ascending}
         },
