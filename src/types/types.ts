@@ -6,6 +6,17 @@ export interface Recipe_TS {
   time: string;
   image?: string;
   category?: string;
-  //   recipeIngredients: string[];
-  //   recipeInstructions: string[];
+  ingredients: Ingredient_TS[];
+  //   instructions: Instruction_TS[];
+}
+
+export interface Ingredient_TS {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface Instruction_TS {
+  stepNumber: number;
+  step: string;
 }
