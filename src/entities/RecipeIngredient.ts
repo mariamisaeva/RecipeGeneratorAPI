@@ -18,6 +18,9 @@ export class RecipeIngredient {
 
   @Column()
   unit!: string;
+
+  @Column()
+  indexNumber!: number;
 }
 
 // Joint table between Recipe and Ingredient

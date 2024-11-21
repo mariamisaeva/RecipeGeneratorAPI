@@ -3,13 +3,33 @@ import { AppDataSource } from '../config/database';
 import { Recipe } from '../entities/Recipe';
 import { Recipe_TS } from '../types/types';
 import { handleIngredients, handleInstructions } from '../utils/helpers';
+import { CategoryEnum } from '../entities/Recipe';
+
 //GetAllRecipes
 const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
   console.log('getAllRecipes Controller is Working...'); ////
 
   try {
     const recipeRepository = AppDataSource.getRepository(Recipe);
-    const fetchAllRecipes = await recipeRepository.find();
+    const fetchAllRecipes = await recipeRepository.find({
+      relations: [
+        'ingredients',
+        'ingredients.ingredient',
+        'instructions',
+        'instructions.instruction',
+      ],
+      order: {
+        id: 'ASC', //sort by id in recipes ascending
+        ingredients: {
+          indexNumber: 'ASC', //sort by orderIndex in ingredients
+        },
+        instructions: {
+          stepNumber: 'ASC', //sort by stepNumber in instructions ascending}
+        },
+      },
+    });
+
+    console.log(fetchAllRecipes); ////
 
     res.status(200).json({
       success: true,
@@ -51,10 +71,15 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
       instructions,
     }: Recipe_TS = req.body;
 
+    if (!Object.values(CategoryEnum).includes(category as CategoryEnum)) {
+      res.status(400).json({
+        success: false,
+        message: `Invalid category! Allowed categories: ${Object.values(
+          CategoryEnum,
+        ).join(', ')}`,
+      });
+    }
     const recipeRepository = AppDataSource.getRepository(Recipe);
-
-    const ingredientsHelper = await handleIngredients(ingredients);
-    const instructionsHelper = await handleInstructions(instructions);
 
     const newRecipe = recipeRepository.create({
       title,
@@ -63,17 +88,34 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
       servings,
       time,
       image,
-      category,
-      ingredients: ingredientsHelper,
-      instructions: instructionsHelper,
+      category: category as CategoryEnum,
     });
 
     await recipeRepository.save(newRecipe);
 
+    await handleIngredients(ingredients, newRecipe);
+    await handleInstructions(instructions, newRecipe);
+
+    // console.log('Ingredients: ', ings); ////
+    // console.log('Instructions: ', insts); ////
+    // console.log('NEW RECIPE: ', newRecipe); ////
+
+    const fullNewRecipe = await recipeRepository.findOne({
+      where: { id: newRecipe.id },
+      relations: [
+        'ingredients',
+        'ingredients.ingredient',
+        'instructions',
+        'instructions.instruction',
+      ],
+    });
+
+    console.log(fullNewRecipe);
+
     res.status(201).json({
       success: true,
       message: 'Recipe created successfully',
-      data: newRecipe,
+      data: fullNewRecipe,
     });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
@@ -81,7 +123,40 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
 };
 //================================================================//
 //GetRecipeById
-// const getRecipeById = async (req: Request, res: Response) => {};
+const getRecipeById = async (req: Request, res: Response) => {
+  console.log('getRecipeById Controller is Working...'); ////
+
+  try {
+    const { id } = req.params;
+    console.log(id); ////
+
+    const recipeRepository = AppDataSource.getRepository(Recipe);
+
+    const recipe = await recipeRepository.findOne({
+      where: { id: Number(id) },
+      relations: [
+        'ingredients',
+        'ingredients.ingredient',
+        'instructions',
+        'instructions.instruction',
+      ],
+    });
+
+    console.log(recipe); ////
+
+    if (!recipe) {
+      res.status(404).json({ success: false, message: 'Recipe not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Getting recipe by id...',
+      data: recipe,
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
 //================================================================//
 //UpdateRecipe //EditRecipe
 // const updateRecipe = async (req: Request, res: Response) => {};
@@ -92,7 +167,7 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
 export {
   getAllRecipes,
   createRecipe,
-  //   getRecipeById,
+  getRecipeById,
   //   updateRecipe,
   //   deleteRecipe,
 };

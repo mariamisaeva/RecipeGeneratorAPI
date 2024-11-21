@@ -14,6 +14,7 @@ export interface Ingredient_TS {
   name: string;
   quantity: number;
   unit: string;
+  orderIndex: number;
 }
 
 export interface Instruction_TS {
