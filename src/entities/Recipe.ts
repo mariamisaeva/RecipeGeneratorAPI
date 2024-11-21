@@ -14,6 +14,23 @@ import { RecipeIngredient } from './RecipeIngredient';
 import { User } from './User';
 import { FavoriteRecipe } from './FavoriteRecipe';
 
+export enum CategoryEnum {
+  Breakfast = 'breakfast',
+  Lunch = 'lunch',
+  Dinner = 'dinner',
+  Snack = 'snack',
+  Dessert = 'dessert',
+  Drink = 'drink',
+  Soup = 'soup',
+  Salad = 'salad',
+  Bread = 'bread',
+  Sauce = 'sauce',
+  IceCream = 'ice-cream',
+  FastFood = 'fast-food',
+  Sandwich = 'sandwich',
+  Other = 'other',
+}
+
 @Entity()
 export class Recipe {
   @PrimaryGeneratedColumn()
@@ -37,8 +54,12 @@ export class Recipe {
   @Column({ default: 'no-image.png' })
   image!: string;
 
-  @Column({ default: 'other' })
-  category!: string;
+  @Column({
+    type: 'enum',
+    enum: CategoryEnum,
+    default: CategoryEnum.Other,
+  })
+  category!: CategoryEnum;
 
   //OneToMany relationship with RecipeIngredient
   @OneToMany(() => RecipeIngredient, (ri) => ri.recipe) //recipe in RecipeIngredient
