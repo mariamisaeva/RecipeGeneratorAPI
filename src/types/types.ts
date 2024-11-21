@@ -7,7 +7,7 @@ export interface Recipe_TS {
   image?: string;
   category?: string;
   ingredients: Ingredient_TS[];
-  //   instructions: Instruction_TS[];
+  instructions: Instruction_TS[];
 }
 
 export interface Ingredient_TS {

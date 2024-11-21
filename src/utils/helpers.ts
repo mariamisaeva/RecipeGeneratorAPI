@@ -1,7 +1,9 @@
 import { AppDataSource } from '../config/database';
-import { Ingredient_TS } from '../types/types';
+import { Ingredient_TS, Instruction_TS } from '../types/types';
 import { Ingredient } from '../entities/Ingredient';
 import { RecipeIngredient } from '../entities/RecipeIngredient';
+import { Instruction } from '../entities/Instruction';
+import { RecipeInstruction } from '../entities/RecipeInstruction';
 
 /* Process ingredients and return RecipeIngredient array.
 - grab repos
@@ -33,14 +35,49 @@ export const handleIngredients = async (
     }
 
     //create RI object
-    const RI = recipeIngredientRepository.create({
+    const RIng = recipeIngredientRepository.create({
       ingredient: singleIngredient,
       quantity,
       unit,
     });
 
-    newIngredients.push(RI);
+    newIngredients.push(RIng);
   }
 
   return newIngredients;
+};
+
+//Instruction - RecipeInstruction
+export const handleInstructions = async (
+  instructions: Instruction_TS[],
+): Promise<RecipeInstruction[]> => {
+  //TODO
+  //pass in instructions //grab repos //create an empty array type RecipeInstruction[] // define a stepNumber starts from 1  //loop through instructions // findOneBy //not exists: create and save it //create new recipe object in the jointRepo with destructured data //push to array + increment num //return
+
+  const instructionsRepository = AppDataSource.getRepository(Instruction);
+  const recipeInstructionRepository =
+    AppDataSource.getRepository(RecipeInstruction);
+
+  const newInstructions: RecipeInstruction[] = [];
+
+  let stepNumber = 1;
+
+  for (const { step } of instructions) {
+    let singleInstruction = await instructionsRepository.findOneBy({ step });
+
+    if (!singleInstruction) {
+      singleInstruction = instructionsRepository.create({ step });
+      await instructionsRepository.save(singleInstruction);
+    }
+
+    const RIns = recipeInstructionRepository.create({
+      instruction: singleInstruction, //instruction in RecipeInstruction
+      stepNumber,
+    });
+
+    newInstructions.push(RIns);
+    stepNumber++;
+  }
+
+  return newInstructions;
 };

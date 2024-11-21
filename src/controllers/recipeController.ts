@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { AppDataSource } from '../config/database';
 import { Recipe } from '../entities/Recipe';
 import { Recipe_TS } from '../types/types';
-import { handleIngredients } from '../utils/helpers';
+import { handleIngredients, handleInstructions } from '../utils/helpers';
 //GetAllRecipes
 const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
   console.log('getAllRecipes Controller is Working...'); ////
@@ -48,12 +48,13 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
       image,
       category,
       ingredients,
-    }: //   instructions,
-    Recipe_TS = req.body;
+      instructions,
+    }: Recipe_TS = req.body;
 
     const recipeRepository = AppDataSource.getRepository(Recipe);
 
     const ingredientsHelper = await handleIngredients(ingredients);
+    const instructionsHelper = await handleInstructions(instructions);
 
     const newRecipe = recipeRepository.create({
       title,
@@ -64,7 +65,7 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
       image,
       category,
       ingredients: ingredientsHelper,
-      //   instructions:
+      instructions: instructionsHelper,
     });
 
     await recipeRepository.save(newRecipe);
