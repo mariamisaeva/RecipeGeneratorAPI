@@ -47,6 +47,7 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
     });
   }
 };
+
 //================================================================//
 //CreateRecipe
 const createRecipe = async (req: Request, res: Response): Promise<void> => {
@@ -121,6 +122,7 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
 //================================================================//
 //GetRecipeById
 const getRecipeById = async (req: Request, res: Response) => {
@@ -157,9 +159,10 @@ const getRecipeById = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
 //================================================================//
 //UpdateRecipe //EditRecipe
-// const updateRecipe = async (req: Request, res: Response) => {};
+const updateRecipe = async (req: Request, res: Response) => {};
 //================================================================//
 //DeleteRecipe
 // const deleteRecipe = async (req: Request, res: Response) => {};
@@ -168,6 +171,6 @@ export {
   getAllRecipes,
   createRecipe,
   getRecipeById,
-  //   updateRecipe,
+  updateRecipe,
   //   deleteRecipe,
 };
