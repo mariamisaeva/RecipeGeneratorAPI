@@ -74,17 +74,15 @@ export const handleIngredients = async (
       }
     }
 
-    //if no existing RecipeIngredient create a new one
+    //if no existing RecipeIngredient create a new one ()
     let singleIngredient = await ingredientsRepository.findOneBy({ name });
 
     if (!singleIngredient) {
-      //   console.log(`Create new single ingredient: ${name}`); ////
       singleIngredient = ingredientsRepository.create({ name });
       await ingredientsRepository.save(singleIngredient);
     }
 
     //create RI object
-    // console.log('Creating new RecipeIngredient...', { name }); ////
     const RIng = recipeIngredientRepository.create({
       ingredient: singleIngredient,
       quantity,
