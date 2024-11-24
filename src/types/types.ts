@@ -11,10 +11,11 @@ export interface Recipe_TS {
 }
 
 export interface Ingredient_TS {
-  name: string;
+  id?: number;
+  ingredient: { id: number; name: string };
   quantity: number;
   unit: string;
-  orderIndex: number;
+  //   indexNumber: number;
 }
 
 export interface Instruction_TS {

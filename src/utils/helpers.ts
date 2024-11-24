@@ -21,24 +21,81 @@ import { Recipe } from '../entities/Recipe';
 export const handleIngredients = async (
   ingredients: Ingredient_TS[],
   recipe: Recipe,
+  isUpdate = false, //update or create
 ): Promise<RecipeIngredient[]> => {
   const ingredientsRepository = AppDataSource.getRepository(Ingredient);
   const recipeIngredientRepository =
     AppDataSource.getRepository(RecipeIngredient);
 
   const newIngredients: RecipeIngredient[] = [];
-
   let indexNumber = 0;
 
-  for (const { name, quantity, unit } of ingredients) {
+  for (const { id: RIngId, quantity, unit, ingredient } of ingredients) {
+    const { id: ingId, name } = ingredient || {};
+
+    let existingRecipeIngredient;
+
+    if (isUpdate && RIngId) {
+      //   if (RIngId) {
+      existingRecipeIngredient = await recipeIngredientRepository.findOne({
+        where: { id: RIngId },
+        relations: ['ingredient'],
+      });
+
+      console.log('Existing RecipeIngredient:', existingRecipeIngredient); // Debugging log
+
+      if (existingRecipeIngredient) {
+        // console.log(`Updating ingredient: ${name}`); // Debugging log
+        // console.log('Existing RecipeIngredientID:', RIngId); // Debugging log
+
+        // Update the quantity and unit
+        existingRecipeIngredient.quantity = quantity;
+        existingRecipeIngredient.unit = unit;
+
+        //check if the ingredient ID exists => update it, if not=> create it
+        if (ingId) {
+          //if exists
+          const existingIng = await ingredientsRepository.findOneBy({
+            id: ingId,
+          });
+          if (existingIng) {
+            //explicit save and update the name
+            if (existingIng.name !== name) {
+              console.log('updating ingredient name: ', existingIng.name);
+              existingIng.name = name;
+              await ingredientsRepository.save(existingIng);
+            }
+            existingRecipeIngredient.ingredient = existingIng;
+          } else {
+            console.log(
+              `Creating new Ingredient for ID: ${ingId} with name: ${name}`,
+            );
+
+            //Create Save And Update
+            const newIng = ingredientsRepository.create({ name });
+            await ingredientsRepository.save(newIng);
+            existingRecipeIngredient.ingredient = newIng;
+          }
+        }
+
+        // Save the updated RecipeIngredient
+        await recipeIngredientRepository.save(existingRecipeIngredient);
+        newIngredients.push(existingRecipeIngredient);
+        continue;
+      }
+      //   }
+    }
+    //if no existing RecipeIngredient create a new one
     let singleIngredient = await ingredientsRepository.findOneBy({ name });
 
     if (!singleIngredient) {
+      //   console.log(`Create new single ingredient: ${name}`); ////
       singleIngredient = ingredientsRepository.create({ name });
       await ingredientsRepository.save(singleIngredient);
     }
 
     //create RI object
+    // console.log('Creating new RecipeIngredient...', { name }); ////
     const RIng = recipeIngredientRepository.create({
       ingredient: singleIngredient,
       quantity,
