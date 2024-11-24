@@ -162,7 +162,119 @@ const getRecipeById = async (req: Request, res: Response) => {
 
 //================================================================//
 //UpdateRecipe //EditRecipe
-const updateRecipe = async (req: Request, res: Response) => {};
+const updateRecipe = async (req: Request, res: Response): Promise<void> => {
+  console.log('updateRecipe Controller is Working...'); ////
+
+  try {
+    const recipeRepository = AppDataSource.getRepository(Recipe);
+    const { id } = req.params;
+
+    // console.log('req.body: ', req.body);
+    const {
+      title,
+      description,
+      isVegetarian,
+      servings,
+      time,
+      image,
+      category,
+      ingredients,
+      instructions,
+    }: Partial<Recipe_TS> = req.body; // Partial<Recipe_TS> - all fields are optional
+
+    // console.log('req.body: ', req.body);
+
+    const existingRecipe = await recipeRepository.findOne({
+      where: { id: Number(id) },
+      relations: [
+        'ingredients',
+        'ingredients.ingredient',
+        'instructions',
+        'instructions.instruction',
+      ],
+    });
+    // console.log(existingRecipe); ////
+
+    if (!existingRecipe) {
+      res.status(404).json({ success: false, message: 'Recipe not found' });
+      return;
+    }
+
+    // if (title) existingRecipe.title = title;
+    // if (description) existingRecipe.description = description;
+    // if (isVegetarian) existingRecipe.isVegetarian = isVegetarian;
+    // if (servings) existingRecipe.servings = servings;
+    // if (time) existingRecipe.time = time;
+    // if (image) existingRecipe.image = image;
+    // if (category) existingRecipe.category = category as CategoryEnum;
+
+    Object.assign(existingRecipe, {
+      ...(title && { title }),
+      ...(description && { description }),
+      ...(isVegetarian && { isVegetarian }),
+      ...(servings && { servings }),
+      ...(time && { time }),
+      ...(image && { image }),
+    });
+    //handle category
+    if (category) {
+      if (!Object.values(CategoryEnum).includes(category as CategoryEnum)) {
+        res.status(400).json({
+          success: false,
+          message: `Invalid category! Allowed categories: ${Object.values(
+            CategoryEnum,
+          ).join(', ')}`,
+        });
+        return;
+      }
+      existingRecipe.category = category as CategoryEnum;
+    }
+
+    if (ingredients) {
+      console.log('Raw Ingredients:, ', ingredients); ////
+
+      const formattedIngredients = ingredients.map((ing: any) => ({
+        id: ing.id, //RecipeIngredient ID
+        quantity: ing.quantity,
+        unit: ing.unit,
+
+        ingredient: {
+          id: ing.ingredient?.id,
+          name: ing.ingredient?.name,
+        },
+      }));
+
+      console.log('Formatted Ingredients:', formattedIngredients); ////
+
+      await handleIngredients(formattedIngredients, existingRecipe, true);
+      console.log('Ingredients updated successfully.');
+    }
+
+    // if (instructions) await handleInstructions(instructions, existingRecipe);
+
+    await recipeRepository.save(existingRecipe);
+    //fetch the updated recipe
+    const updatedRecipe = await recipeRepository.findOne({
+      where: { id: Number(id) },
+      relations: [
+        'ingredients',
+        'ingredients.ingredient',
+        'instructions',
+        'instructions.instruction',
+      ],
+    });
+    // console.log(updatedRecipe); ////
+
+    res.status(200).json({
+      success: true,
+      message: 'Recipe updated successfully',
+      data: updatedRecipe,
+    });
+  } catch (err: any) {
+    console.error('Error in updateRecipe:', err); // Debug log
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
 //================================================================//
 //DeleteRecipe
 // const deleteRecipe = async (req: Request, res: Response) => {};
