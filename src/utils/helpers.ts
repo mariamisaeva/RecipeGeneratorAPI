@@ -36,13 +36,10 @@ export const handleIngredients = async (
     let existingRecipeIngredient;
 
     if (isUpdate && RIngId) {
-      //   if (RIngId) {
       existingRecipeIngredient = await recipeIngredientRepository.findOne({
         where: { id: RIngId },
         relations: ['ingredient'],
       });
-
-      console.log('Existing RecipeIngredient:', existingRecipeIngredient); // Debugging log
 
       if (existingRecipeIngredient) {
         // console.log(`Updating ingredient: ${name}`); // Debugging log
