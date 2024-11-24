@@ -42,16 +42,12 @@ export const handleIngredients = async (
       });
 
       if (existingRecipeIngredient) {
-        // console.log(`Updating ingredient: ${name}`); // Debugging log
-        // console.log('Existing RecipeIngredientID:', RIngId); // Debugging log
-
         // Update the quantity and unit
         existingRecipeIngredient.quantity = quantity;
         existingRecipeIngredient.unit = unit;
 
         //check if the ingredient ID exists => update it, if not=> create it
         if (ingId) {
-          //if exists
           const existingIng = await ingredientsRepository.findOneBy({
             id: ingId,
           });
@@ -64,10 +60,6 @@ export const handleIngredients = async (
             }
             existingRecipeIngredient.ingredient = existingIng;
           } else {
-            console.log(
-              `Creating new Ingredient for ID: ${ingId} with name: ${name}`,
-            );
-
             //Create Save And Update
             const newIng = ingredientsRepository.create({ name });
             await ingredientsRepository.save(newIng);
@@ -80,8 +72,8 @@ export const handleIngredients = async (
         newIngredients.push(existingRecipeIngredient);
         continue;
       }
-      //   }
     }
+
     //if no existing RecipeIngredient create a new one
     let singleIngredient = await ingredientsRepository.findOneBy({ name });
 
