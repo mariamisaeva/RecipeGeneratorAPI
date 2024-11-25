@@ -4,6 +4,7 @@ import { Recipe } from '../entities/Recipe';
 import { Recipe_TS } from '../types/types';
 import { handleIngredients, handleInstructions } from '../utils/helpers';
 import { CategoryEnum } from '../entities/Recipe';
+import { RecipeInstruction } from '../entities/RecipeInstruction';
 
 //GetAllRecipes
 const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
@@ -231,7 +232,7 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
     }
 
     if (ingredients) {
-      console.log('Raw Ingredients:, ', ingredients); ////
+      //   console.log('Raw Ingredients:, ', ingredients); ////
 
       const formattedIngredients = ingredients.map((ing: any) => ({
         id: ing.id, //RecipeIngredient ID
@@ -244,13 +245,28 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
         },
       }));
 
-      console.log('Formatted Ingredients:', formattedIngredients); ////
+      //   console.log('Formatted Ingredients:', formattedIngredients); ////
 
       await handleIngredients(formattedIngredients, existingRecipe, true);
-      console.log('Ingredients updated successfully.');
+      //   console.log('Ingredients updated successfully.');
     }
 
-    // if (instructions) await handleInstructions(instructions, existingRecipe);
+    if (instructions) {
+      const formattedInstructions = instructions.map((ins: any) => ({
+        id: ins.id,
+        stepNumber: ins.stepNumber,
+        instruction: {
+          id: ins.instruction?.id,
+          step: ins.instruction?.step,
+        },
+      }));
+      console.log(
+        'Formatted Instructions for handleInstructions:',
+        formattedInstructions,
+      );
+
+      await handleInstructions(formattedInstructions, existingRecipe, true);
+    }
 
     await recipeRepository.save(existingRecipe);
     //fetch the updated recipe

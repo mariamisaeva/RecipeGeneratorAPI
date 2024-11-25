@@ -19,6 +19,7 @@ export interface Ingredient_TS {
 }
 
 export interface Instruction_TS {
+  id?: number;
   stepNumber: number;
-  step: string;
+  instruction: { id: number; step: string };
 }

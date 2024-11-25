@@ -54,7 +54,6 @@ export const handleIngredients = async (
           if (existingIng) {
             //explicit save and update the name
             if (existingIng.name !== name) {
-              console.log('updating ingredient name: ', existingIng.name);
               existingIng.name = name;
               await ingredientsRepository.save(existingIng);
             }
@@ -100,11 +99,12 @@ export const handleIngredients = async (
 };
 
 //Instruction - RecipeInstruction
-//TODO
+//TODOp
 //pass in instructions //grab repos //create an empty array type RecipeInstruction[] // define a stepNumber starts from 1  //loop through instructions // findOneBy //not exists: create and save it //create new recipe object in the jointRepo with destructured data //save it to jointRepo //push to array + increment num //return
 export const handleInstructions = async (
   instructions: Instruction_TS[],
   recipe: Recipe,
+  isUpdate = false,
 ): Promise<RecipeInstruction[]> => {
   const instructionsRepository = AppDataSource.getRepository(Instruction);
   const recipeInstructionRepository =
@@ -112,9 +112,62 @@ export const handleInstructions = async (
 
   const newInstructions: RecipeInstruction[] = [];
 
-  let stepNumber = 1;
+  //   let stepNumber = 1;
+  let increaseNumber = 1;
 
-  for (const { step } of instructions) {
+  for (const { id: RInsId, stepNumber, instruction } of instructions) {
+    const { id: insId, step } = instruction || {};
+
+    let existingRecipeInstruction;
+
+    if (isUpdate /*&& RInsId*/) {
+      //if the RIid exists
+      if (RInsId) {
+        // grab it
+        existingRecipeInstruction = await recipeInstructionRepository.findOne({
+          where: { id: RInsId },
+          relations: ['instruction'],
+        });
+
+        //if found
+        if (existingRecipeInstruction) {
+          // Retain current stepNumber unless explicitly updated
+          existingRecipeInstruction.stepNumber =
+            stepNumber ?? existingRecipeInstruction.stepNumber;
+
+          //check for insID
+          if (insId) {
+            //look for it
+            const existingIns = await instructionsRepository.findOneBy({
+              id: insId,
+            }); //found/not found
+
+            if (existingIns) {
+              //found => update and save the step explicitly
+              if (existingIns.step !== step) {
+                existingIns.step = step;
+                await instructionsRepository.save(existingIns);
+              }
+              //Then update the instruction in the RecipeInstruction
+              existingRecipeInstruction.instruction = existingIns;
+            }
+            // else {
+            //   //not found => create a new instruction and save it
+            //   const newIns = instructionsRepository.create({ step });
+            //   await instructionsRepository.save(newIns);
+            //   existingRecipeInstruction.instruction = newIns;
+            // }
+          }
+
+          //Save Updated RecipeInstruction
+          await recipeInstructionRepository.save(existingRecipeInstruction);
+          newInstructions.push(existingRecipeInstruction);
+          continue; // go to the next iteration
+        }
+      }
+    }
+
+    //USING TO CREATE A NEW INSTRUCTION (create-recipe)
     let singleInstruction = await instructionsRepository.findOneBy({ step });
 
     if (!singleInstruction) {
@@ -122,25 +175,16 @@ export const handleInstructions = async (
       await instructionsRepository.save(singleInstruction);
     }
 
-    // console.log('Saving RecipeInstruction:', {
-    //   recipe: recipe.id,
-    //   stepNumber,
-    //   step,
-    // });
-
     const RIns = recipeInstructionRepository.create({
       instruction: singleInstruction, //instruction in RecipeInstruction
       recipe,
-      stepNumber,
+      stepNumber: stepNumber ?? ++increaseNumber,
     });
 
     await recipeInstructionRepository.save(RIns);
-
     newInstructions.push(RIns);
-    stepNumber++;
+    // stepNumber++;
   }
-
-  //   console.log('newInstructions:', newInstructions);
 
   return newInstructions;
 };
