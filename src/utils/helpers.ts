@@ -85,7 +85,7 @@ export const handleUpdateIngredients = async (
     const { id: RIngID, quantity, unit, ingredient } = ing;
     const { id, name } = ingredient || {};
 
-    //if no name throw an error
+    //if no name and id throw an error
     if (!name && !id) {
       throw new Error('Ingredient name or id is required');
     }
