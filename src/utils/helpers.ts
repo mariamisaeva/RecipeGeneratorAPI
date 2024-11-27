@@ -128,7 +128,6 @@ export const handleUpdateIngredients = async (
     //find the ingredient by name -- not found? -> create and save it
     let newIng = await ingredientsRepository.findOneBy({ name });
     if (!newIng) {
-      console.log('Creating a new Ingredient:', name); ////
       newIng = ingredientsRepository.create({ name });
       await ingredientsRepository.save(newIng);
     }
