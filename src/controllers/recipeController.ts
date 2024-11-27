@@ -2,7 +2,11 @@ import { Request, Response } from 'express';
 import { AppDataSource } from '../config/database';
 import { Recipe } from '../entities/Recipe';
 import { Recipe_TS } from '../types/types';
-import { handleIngredients, handleInstructions } from '../utils/helpers';
+import {
+  handleIngredients,
+  handleInstructions,
+  handleUpdateIngredients,
+} from '../utils/helpers';
 import { CategoryEnum } from '../entities/Recipe';
 
 //GetAllRecipes
@@ -93,13 +97,14 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
     });
 
     await recipeRepository.save(newRecipe);
+    console.log('Ingredients before Handle: ', ingredients); ////
 
     await handleIngredients(ingredients, newRecipe);
     await handleInstructions(instructions, newRecipe);
 
-    // console.log('Ingredients: ', ings); ////
+    console.log('Ingredients: ', ingredients); ////
     // console.log('Instructions: ', insts); ////
-    // console.log('NEW RECIPE: ', newRecipe); ////
+    console.log('NEW RECIPE: ', newRecipe); ////
 
     const fullNewRecipe = await recipeRepository.findOne({
       where: { id: newRecipe.id },
@@ -111,7 +116,7 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
       ],
     });
 
-    console.log(fullNewRecipe);
+    // console.log(fullNewRecipe);
 
     res.status(201).json({
       success: true,
@@ -130,7 +135,7 @@ const getRecipeById = async (req: Request, res: Response) => {
 
   try {
     const { id } = req.params;
-    console.log(id); ////
+    // console.log(id); ////
 
     const recipeRepository = AppDataSource.getRepository(Recipe);
 
@@ -144,7 +149,7 @@ const getRecipeById = async (req: Request, res: Response) => {
       ],
     });
 
-    console.log(recipe); ////
+    // console.log(recipe); ////
 
     if (!recipe) {
       res.status(404).json({ success: false, message: 'Recipe not found' });
@@ -232,25 +237,38 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
 
     if (ingredients) {
       console.log('Raw Ingredients:, ', ingredients); ////
+      await handleUpdateIngredients(ingredients, existingRecipe);
+      //   const formattedIngredients = ingredients.map((ing: any) => ({
+      //     // id: ing.id, //RecipeIngredient ID
+      //     quantity: ing.quantity,
+      //     unit: ing.unit,
+      //     ingredient: {
+      //       //   id: ing.ingredient?.id,
+      //       name: ing.ingredient?.name,
+      //     },
+      //   }));
 
-      const formattedIngredients = ingredients.map((ing: any) => ({
-        id: ing.id, //RecipeIngredient ID
-        quantity: ing.quantity,
-        unit: ing.unit,
-
-        ingredient: {
-          id: ing.ingredient?.id,
-          name: ing.ingredient?.name,
-        },
-      }));
-
-      console.log('Formatted Ingredients:', formattedIngredients); ////
-
-      await handleIngredients(formattedIngredients, existingRecipe, true);
+      //   console.log('Formatted Ingredients:', formattedIngredients); ////
+      //   await handleIngredients(ingredients, existingRecipe);
       console.log('Ingredients updated successfully.');
     }
 
-    // if (instructions) await handleInstructions(instructions, existingRecipe);
+    // if (instructions) {
+    //   const formattedInstructions = instructions.map((ins: any) => ({
+    //     id: ins.id,
+    //     stepNumber: ins.stepNumber,
+    //     instruction: {
+    //       id: ins.instruction?.id,
+    //       step: ins.instruction?.step,
+    //     },
+    //   }));
+    //   console.log(
+    //     'Formatted Instructions for handleInstructions:',
+    //     formattedInstructions,
+    //   );
+
+    //   await handleInstructions(formattedInstructions, existingRecipe, true);
+    // }
 
     await recipeRepository.save(existingRecipe);
     //fetch the updated recipe
@@ -263,7 +281,7 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
         'instructions.instruction',
       ],
     });
-    // console.log(updatedRecipe); ////
+    console.log(updatedRecipe); ////
 
     res.status(200).json({
       success: true,
