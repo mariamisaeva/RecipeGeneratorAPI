@@ -13,10 +13,10 @@ export class RecipeIngredient {
   @ManyToOne(() => Ingredient, (i) => i.recipeIngredients) //no cascade-delete ingredients to prevent accidental deletion
   ingredient!: Ingredient;
 
-  @Column('decimal', { precision: 10, scale: 2 }) // 10 digits in total, 2 after the decimal point
+  @Column('decimal', { precision: 10, scale: 2, nullable: true }) // 10 digits in total, 2 after the decimal point
   quantity!: number;
 
-  @Column()
+  @Column({ nullable: true })
   unit!: string;
 
   @Column()

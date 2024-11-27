@@ -2,7 +2,11 @@ import { Request, Response } from 'express';
 import { AppDataSource } from '../config/database';
 import { Recipe } from '../entities/Recipe';
 import { Recipe_TS } from '../types/types';
-import { handleIngredients, handleInstructions } from '../utils/helpers';
+import {
+  handleIngredients,
+  handleInstructions,
+  handleUpdateIngredients,
+} from '../utils/helpers';
 import { CategoryEnum } from '../entities/Recipe';
 
 //GetAllRecipes
@@ -233,18 +237,19 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
 
     if (ingredients) {
       console.log('Raw Ingredients:, ', ingredients); ////
-      const formattedIngredients = ingredients.map((ing: any) => ({
-        // id: ing.id, //RecipeIngredient ID
-        quantity: ing.quantity,
-        unit: ing.unit,
-        ingredient: {
-          //   id: ing.ingredient?.id,
-          name: ing.ingredient?.name,
-        },
-      }));
+      await handleUpdateIngredients(ingredients, existingRecipe);
+      //   const formattedIngredients = ingredients.map((ing: any) => ({
+      //     // id: ing.id, //RecipeIngredient ID
+      //     quantity: ing.quantity,
+      //     unit: ing.unit,
+      //     ingredient: {
+      //       //   id: ing.ingredient?.id,
+      //       name: ing.ingredient?.name,
+      //     },
+      //   }));
 
-      console.log('Formatted Ingredients:', formattedIngredients); ////
-      await handleIngredients(formattedIngredients, existingRecipe, true);
+      //   console.log('Formatted Ingredients:', formattedIngredients); ////
+      //   await handleIngredients(ingredients, existingRecipe);
       console.log('Ingredients updated successfully.');
     }
 
