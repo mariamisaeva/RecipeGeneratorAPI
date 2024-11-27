@@ -83,12 +83,11 @@ export const handleUpdateIngredients = async (
   for (const ing of ingredients) {
     //Destructure the incoming data
     const { id: RIngID, quantity, unit, ingredient } = ing;
-    const { name } = ingredient || {};
+    const { id, name } = ingredient || {};
 
     //if no name throw an error
-    if (!name) {
-      console.log('No name provided');
-      //   throw new Error('Ingredient name is required');
+    if (!name && !id) {
+      throw new Error('Ingredient name or id is required');
     }
 
     let existingRIng: RecipeIngredient | null = null;
