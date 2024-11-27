@@ -67,9 +67,6 @@ export const handleUpdateIngredients = async (
   ingredients: Ingredient_TS[],
   recipe: Recipe,
 ): Promise<RecipeIngredient[]> => {
-  console.log('UPDATE INGREDIENTS IS WORKING ... '); ////
-  console.log('Incoming ingredients: ', ingredients); ////
-
   //grab repos
   const ingredientsRepository = AppDataSource.getRepository(Ingredient);
   const recipeIngredientRepository =
@@ -98,8 +95,6 @@ export const handleUpdateIngredients = async (
         where: { id: RIngID },
         relations: ['ingredient'],
       });
-
-      console.log('Existing Recipe Ingredient:', existingRIng); ////
 
       //if exists, update its props and associated ingredient
       if (existingRIng) {
@@ -130,8 +125,6 @@ export const handleUpdateIngredients = async (
     }
 
     //if no existing RecipeIngredient create a new one
-    console.log('Creating a new RecipeIngredient...', name); ////
-
     //find the ingredient by name -- not found? -> create and save it
     let newIng = await ingredientsRepository.findOneBy({ name });
     if (!newIng) {
@@ -148,8 +141,6 @@ export const handleUpdateIngredients = async (
       recipe,
       indexNumber,
     });
-
-    console.log('New Recipe Ingredient:', newRI); ////
 
     await recipeIngredientRepository.save(newRI);
     updatedIngredients.push(newRI);
@@ -172,7 +163,6 @@ export const handleUpdateIngredients = async (
     relations: ['ingredient'],
   });
 
-  console.log('FINAL Updated Ingredients:', updatedIngredients); ////
   return updatedIngredients;
 };
 
