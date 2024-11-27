@@ -156,6 +156,15 @@ export const handleUpdateIngredients = async (
     indexNumber++;
   }
 
+  //delete excluded RecipeIngredients
+  if (updatedIngredients.length < recipe.ingredients.length) {
+    const deletedIngredients = recipe.ingredients.filter(
+      (ri) => !updatedIngredients.some((uRIng) => uRIng.id === ri.id),
+    );
+    console.log('Deleting RecipeIngredients:', deletedIngredients); ////
+    await recipeIngredientRepository.remove(deletedIngredients);
+  }
+
   //PROBLEM: The new ingredients are not reflected in the recipe object.
   //SOLUTION: Reload 'recipe.ingredients' from the DB with the updated ingredients
   recipe.ingredients = await recipeIngredientRepository.find({
