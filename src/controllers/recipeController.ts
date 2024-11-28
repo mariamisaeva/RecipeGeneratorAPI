@@ -253,22 +253,22 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
       console.log('Ingredients updated successfully.');
     }
 
-    // if (instructions) {
-    //   const formattedInstructions = instructions.map((ins: any) => ({
-    //     id: ins.id,
-    //     stepNumber: ins.stepNumber,
-    //     instruction: {
-    //       id: ins.instruction?.id,
-    //       step: ins.instruction?.step,
-    //     },
-    //   }));
-    //   console.log(
-    //     'Formatted Instructions for handleInstructions:',
-    //     formattedInstructions,
-    //   );
+    if (instructions) {
+      //   const formattedInstructions = instructions.map((ins: any) => ({
+      //     id: ins.id,
+      //     stepNumber: ins.stepNumber,
+      //     instruction: {
+      //       id: ins.instruction?.id,
+      //       step: ins.instruction?.step,
+      //     },
+      //   }));
+      //   console.log(
+      //     'Formatted Instructions for handleInstructions:',
+      //     formattedInstructions,
+      //   );
 
-    //   await handleInstructions(formattedInstructions, existingRecipe, true);
-    // }
+      await handleInstructions(instructions, existingRecipe, true);
+    }
 
     await recipeRepository.save(existingRecipe);
     //fetch the updated recipe

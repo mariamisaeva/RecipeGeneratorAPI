@@ -177,9 +177,20 @@ export const handleInstructions = async (
     AppDataSource.getRepository(RecipeInstruction);
 
   const newInstructions: RecipeInstruction[] = [];
-  let stepNumber = 1;
+  //   let stepNumber = 1;
+  let maxStepNumber = 0;
 
-  for (const { id: RInsID, instruction } of instructions) {
+  if (isUpdate) {
+    const currentInstructions = await recipeInstructionRepository.find({
+      where: { recipe: { id: recipe.id } },
+    });
+    maxStepNumber = Math.max(
+      0,
+      ...currentInstructions.map((ins) => ins.stepNumber),
+    ); //get max step number
+  }
+
+  for (const { id: RInsID, instruction, stepNumber } of instructions) {
     const { id, step } = instruction || {};
 
     if (!step && !id) {
@@ -209,6 +220,7 @@ export const handleInstructions = async (
             existingInst = instructionsRepository.create({ step });
             await instructionsRepository.save(existingInst);
           }
+
           existingRecipeInst.instruction = existingInst;
         }
 
@@ -227,16 +239,27 @@ export const handleInstructions = async (
       await instructionsRepository.save(singleInstruction);
     }
 
+    // Assign stepNumber: Use provided value or increment maxStepNumber
+    const newStepNumber = stepNumber ?? ++maxStepNumber;
+
     const RIns = recipeInstructionRepository.create({
       instruction: singleInstruction, //instruction in RecipeInstruction
       recipe,
-      stepNumber,
+      stepNumber: newStepNumber,
     });
 
     await recipeInstructionRepository.save(RIns);
     newInstructions.push(RIns);
-    stepNumber++;
+    // stepNumber++;
   }
+
+  recipe.instructions = await recipeInstructionRepository.find({
+    where: { recipe: { id: recipe.id } },
+    relations: ['instruction'],
+  });
+  console.log('recipe.instructions: ', recipe.instructions); ////
+
+  console.log('New Instructions:', newInstructions); ////
 
   return newInstructions;
 };
