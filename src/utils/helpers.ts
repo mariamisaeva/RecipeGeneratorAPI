@@ -62,7 +62,6 @@ export const handleIngredients = async (
   //   console.log('New Ingredients:', newIngredients); ////
   return newIngredients;
 };
-
 export const handleUpdateIngredients = async (
   ingredients: Ingredient_TS[],
   recipe: Recipe,
