@@ -177,55 +177,45 @@ export const handleInstructions = async (
     AppDataSource.getRepository(RecipeInstruction);
 
   const newInstructions: RecipeInstruction[] = [];
-
   let stepNumber = 1;
 
-  for (const { id: RInsId, instruction } of instructions) {
-    const { id: insId, step } = instruction || {};
+  for (const { id: RInsID, instruction } of instructions) {
+    const { id, step } = instruction || {};
 
-    let existingRecipeInstruction;
+    if (!step && !id) {
+      throw new Error('Instruction step or id is required');
+    }
 
-    if (isUpdate && RInsId) {
+    let existingRecipeInst: RecipeInstruction | null = null;
+
+    if (isUpdate && RInsID) {
       //if the RIid exists
       // grab it
-      existingRecipeInstruction = await recipeInstructionRepository.findOne({
-        where: { id: RInsId },
+      existingRecipeInst = await recipeInstructionRepository.findOne({
+        where: { id: RInsID },
         relations: ['instruction'],
       });
 
       //if found
-      if (existingRecipeInstruction) {
+      if (existingRecipeInst) {
         // Retain current stepNumber unless explicitly updated
-        existingRecipeInstruction.stepNumber =
-          stepNumber ?? existingRecipeInstruction.stepNumber;
+        existingRecipeInst.stepNumber =
+          stepNumber ?? existingRecipeInst.stepNumber;
 
-        //check for insID
-        if (insId) {
-          //look for it
-          const existingIns = await instructionsRepository.findOneBy({
-            id: insId,
-          }); //found/not found
+        if (step && existingRecipeInst.instruction.step !== step) {
+          let existingInst = await instructionsRepository.findOneBy({ step });
 
-          if (existingIns) {
-            //found => update and save the step explicitly
-            if (existingIns.step !== step) {
-              existingIns.step = step;
-              await instructionsRepository.save(existingIns);
-            }
-            //Then update the instruction in the RecipeInstruction
-            existingRecipeInstruction.instruction = existingIns;
-          } else {
-            //not found => create a new instruction and save it
-            const newIns = instructionsRepository.create({ step });
-            await instructionsRepository.save(newIns);
-            existingRecipeInstruction.instruction = newIns;
+          if (!existingInst) {
+            existingInst = instructionsRepository.create({ step });
+            await instructionsRepository.save(existingInst);
           }
+          existingRecipeInst.instruction = existingInst;
         }
 
-        //Save Updated RecipeInstruction
-        await recipeInstructionRepository.save(existingRecipeInstruction);
-        newInstructions.push(existingRecipeInstruction);
-        continue; // go to the next iteration
+        //save the updated RecipeInstruction and push it to the empty array
+        await recipeInstructionRepository.save(existingRecipeInst);
+        newInstructions.push(existingRecipeInst);
+        continue;
       }
     }
 
@@ -240,7 +230,6 @@ export const handleInstructions = async (
     const RIns = recipeInstructionRepository.create({
       instruction: singleInstruction, //instruction in RecipeInstruction
       recipe,
-      //   stepNumber: stepNumber,
       stepNumber,
     });
 
