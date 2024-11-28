@@ -253,6 +253,15 @@ export const handleInstructions = async (
     // stepNumber++;
   }
 
+  //DELETE EXCLUDED INSTRUCTIONS
+  if (newInstructions.length < recipe.instructions.length) {
+    const deletedInstructions = recipe.instructions.filter(
+      (ri) => !newInstructions.some((uRIns) => uRIns.id === ri.id),
+    );
+    await recipeInstructionRepository.remove(deletedInstructions);
+  }
+
+  //Reload recipe.instructions
   recipe.instructions = await recipeInstructionRepository.find({
     where: { recipe: { id: recipe.id } },
     relations: ['instruction'],
