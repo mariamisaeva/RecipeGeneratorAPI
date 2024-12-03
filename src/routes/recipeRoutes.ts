@@ -4,7 +4,7 @@ import {
   createRecipe,
   getRecipeById,
   updateRecipe,
-  //   deleteRecipe,
+  deleteRecipe,
 } from '../controllers/recipeController';
 
 const RecipeRouter = express.Router();
@@ -14,6 +14,6 @@ RecipeRouter.post('/create-recipe', createRecipe); //  /api/recipes/create-recip
 
 RecipeRouter.get('/:id', getRecipeById); //  /api/recipes/:id
 RecipeRouter.put('/edit/:id', updateRecipe); //  /api/recipes/:id
-// RecipeRouter.delete('/:id', deleteRecipe); //  /api/recipes/:id
+RecipeRouter.delete('/:id', deleteRecipe); //  /api/recipes/:id
 
 export default RecipeRouter;

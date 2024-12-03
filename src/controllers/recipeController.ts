@@ -296,12 +296,46 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
 };
 //================================================================//
 //DeleteRecipe
-// const deleteRecipe = async (req: Request, res: Response) => {};
+const deleteRecipe = async (req: Request, res: Response): Promise<void> => {
+  console.log('deleteRecipe Controller is Working...'); ////
+
+  try {
+    const { id } = req.params;
+    console.log('id:', id); ////
+
+    //Grab the repo
+    const recipeRepository = AppDataSource.getRepository(Recipe);
+
+    //find the recipe where id = id
+    const recipe = await recipeRepository.findOne({
+      where: { id: Number(id) },
+    });
+    //handle if not found
+    if (!recipe) {
+      res.status(404).json({ success: false, message: 'Recipe not found' });
+      return;
+    }
+
+    const recipeTitle = recipe.title;
+    console.log('Recipe to delete:', recipeTitle); ////
+
+    //delete it
+    await recipeRepository.remove(recipe);
+
+    res.status(200).json({
+      success: true,
+      message: `Recipe ${recipeTitle} deleted successfully`,
+    });
+  } catch (err: any) {
+    console.error('Error in deleteRecipe:', err); // Debug log
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
 
 export {
   getAllRecipes,
   createRecipe,
   getRecipeById,
   updateRecipe,
-  //   deleteRecipe,
+  deleteRecipe,
 };
