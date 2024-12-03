@@ -5,7 +5,7 @@ import { Recipe_TS } from '../types/types';
 import {
   handleIngredients,
   handleInstructions,
-  handleUpdateIngredients,
+  //   handleUpdateIngredients,
 } from '../utils/helpers';
 import { CategoryEnum } from '../entities/Recipe';
 
@@ -237,7 +237,7 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
 
     if (ingredients) {
       console.log('Raw Ingredients:, ', ingredients); ////
-      await handleUpdateIngredients(ingredients, existingRecipe);
+      await handleIngredients(ingredients, existingRecipe, true);
       //   const formattedIngredients = ingredients.map((ing: any) => ({
       //     // id: ing.id, //RecipeIngredient ID
       //     quantity: ing.quantity,

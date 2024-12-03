@@ -62,9 +62,12 @@ export const handleIngredients = async (
   //   console.log('New Ingredients:', newIngredients); ////
   return newIngredients;
 };
+
+//UPDATE INGREDIENTS
 export const handleUpdateIngredients = async (
   ingredients: Ingredient_TS[],
   recipe: Recipe,
+  isUpdate = false,
 ): Promise<RecipeIngredient[]> => {
   //grab repos
   const ingredientsRepository = AppDataSource.getRepository(Ingredient);
@@ -89,7 +92,7 @@ export const handleUpdateIngredients = async (
     let existingRIng: RecipeIngredient | null = null;
 
     //if RIngID exists, find the existing RecipeIngredient by id
-    if (RIngID) {
+    if (isUpdate && RIngID) {
       existingRIng = await recipeIngredientRepository.findOne({
         where: { id: RIngID },
         relations: ['ingredient'],
@@ -125,15 +128,15 @@ export const handleUpdateIngredients = async (
 
     //if no existing RecipeIngredient create a new one
     //find the ingredient by name -- not found? -> create and save it
-    let newIng = await ingredientsRepository.findOneBy({ name });
-    if (!newIng) {
-      newIng = ingredientsRepository.create({ name });
-      await ingredientsRepository.save(newIng);
+    let singleIngredient = await ingredientsRepository.findOneBy({ name });
+    if (!singleIngredient) {
+      singleIngredient = ingredientsRepository.create({ name });
+      await ingredientsRepository.save(singleIngredient);
     }
 
     //create RI object
     const newRI = recipeIngredientRepository.create({
-      ingredient: newIng,
+      ingredient: singleIngredient,
       quantity,
       unit,
       recipe,
@@ -145,7 +148,7 @@ export const handleUpdateIngredients = async (
     indexNumber++;
   }
 
-  //delete excluded RecipeIngredients
+  //DELETE EXCLUDED RecipeIngredients
   if (updatedIngredients.length < recipe.ingredients.length) {
     const deletedIngredients = recipe.ingredients.filter(
       (ri) => !updatedIngredients.some((uRIng) => uRIng.id === ri.id),
@@ -167,7 +170,8 @@ export const handleUpdateIngredients = async (
 //Instruction - RecipeInstruction
 //TODO
 //pass in instructions //grab repos //create an empty array type RecipeInstruction[] // define a stepNumber starts from 1  //loop through instructions // findOneBy //not exists: create and save it //create new recipe object in the jointRepo with destructured data //save it to jointRepo //push to array + increment num //return
-export const handleInstructions = async (
+
+export const handleUpdateInstructions = async (
   instructions: Instruction_TS[],
   recipe: Recipe,
   isUpdate = false,
@@ -178,16 +182,21 @@ export const handleInstructions = async (
 
   const newInstructions: RecipeInstruction[] = [];
   //   let stepNumber = 1;
-  let maxStepNumber = 0;
+  let maxStepNumber = 1;
 
   if (isUpdate) {
     const currentInstructions = await recipeInstructionRepository.find({
       where: { recipe: { id: recipe.id } },
     });
-    maxStepNumber = Math.max(
-      0,
-      ...currentInstructions.map((ins) => ins.stepNumber),
-    ); //get max step number
+
+    maxStepNumber = currentInstructions.reduce(
+      (max, ins) => Math.max(max, ins.stepNumber),
+      1,
+    );
+    //  Math.max(
+    //   0,
+    //   ...currentInstructions.map((ins) => ins.stepNumber),
+    // ); //get max step number
   }
 
   for (const { id: RInsID, instruction, stepNumber } of instructions) {
@@ -262,10 +271,10 @@ export const handleInstructions = async (
   }
 
   //Reload recipe.instructions
-  recipe.instructions = await recipeInstructionRepository.find({
-    where: { recipe: { id: recipe.id } },
-    relations: ['instruction'],
-  });
+  //   recipe.instructions = await recipeInstructionRepository.find({
+  //     where: { recipe: { id: recipe.id } },
+  //     relations: ['instruction'],
+  //   });
   console.log('recipe.instructions: ', recipe.instructions); ////
 
   console.log('New Instructions:', newInstructions); ////
