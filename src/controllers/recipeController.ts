@@ -6,6 +6,7 @@ import {
   handleIngredients,
   handleInstructions,
   handleUpdateIngredients,
+  handleUpdateInstructions,
 } from '../utils/helpers';
 import { CategoryEnum } from '../entities/Recipe';
 
@@ -267,7 +268,7 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
       //     formattedInstructions,
       //   );
 
-      await handleInstructions(instructions, existingRecipe, true);
+      await handleUpdateInstructions(instructions, existingRecipe);
     }
 
     await recipeRepository.save(existingRecipe);
