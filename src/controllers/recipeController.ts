@@ -1,7 +1,12 @@
 import { Request, Response } from 'express';
 import { AppDataSource } from '../config/database';
 import { Recipe } from '../entities/Recipe';
-import { Recipe_TS } from '../types/types';
+import {
+  Recipe_TS,
+  RecipeQueryParams,
+  PaginationMetadata,
+  GetAllRecipesResponse,
+} from '../types/types';
 import {
   handleIngredients,
   handleInstructions,
@@ -16,7 +21,44 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
 
   try {
     const recipeRepository = AppDataSource.getRepository(Recipe);
-    const fetchAllRecipes = await recipeRepository.find({
+    //get query params
+    const {
+      page = 1,
+      limit = 10,
+      category,
+      isVegetarian,
+      time,
+    } = req.query as unknown as RecipeQueryParams;
+    // console.log('Query Params:', req.query); ////
+    const pageNumber = parseInt(page as string, 10); //Number(page);
+    const pageSize = parseInt(limit as string, 10); //Number(limit);
+    const offset = (pageNumber - 1) * pageSize;
+
+    //built dynamic query filters
+    const filters: any = {};
+    if (category) filters.category = category as CategoryEnum;
+
+    if (isVegetarian) filters.isVegetarian = isVegetarian === 'true';
+
+    if (time) filters.time = time;
+
+    console.log(
+      AppDataSource.createQueryBuilder(Recipe, 'recipe')
+        .leftJoinAndSelect('recipe.ingredients', 'ingredients')
+        .leftJoinAndSelect('ingredients.ingredient', 'ingredient')
+        .leftJoinAndSelect('recipe.instructions', 'instructions')
+        .leftJoinAndSelect('instructions.instruction', 'instruction')
+        .where(filters)
+        .orderBy('recipe.id', 'ASC')
+        .addOrderBy('ingredients.indexNumber', 'ASC')
+        .addOrderBy('instructions.stepNumber', 'ASC')
+        .skip(offset)
+        .take(pageSize)
+        .getSql(),
+    ); ////
+
+    const [fetchAllRecipes, total] = await recipeRepository.findAndCount({
+      where: filters,
       relations: [
         'ingredients',
         'ingredients.ingredient',
@@ -24,23 +66,35 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
         'instructions.instruction',
       ],
       order: {
-        id: 'ASC', //sort by id in recipes ascending
-        ingredients: {
-          indexNumber: 'ASC', //sort by orderIndex in ingredients
-        },
-        instructions: {
-          stepNumber: 'ASC', //sort by stepNumber in instructions ascending}
-        },
+        id: 'DESC', //sort by id in recipes ascending
+        // ingredients: {
+        //   indexNumber: 'ASC', //sort by orderIndex in ingredients
+        // },
+        // instructions: {
+        //   stepNumber: 'ASC', //sort by stepNumber in instructions ascending}
+        // },
       },
+      skip: offset,
+      take: pageSize,
     });
 
     console.log(fetchAllRecipes); ////
 
-    res.status(200).json({
+    const pagination: PaginationMetadata = {
+      total,
+      currentPage: pageNumber,
+      totalPages: Math.ceil(total / pageSize),
+      pageSize,
+    };
+
+    const response: GetAllRecipesResponse = {
       success: true,
       message: 'Getting all recipes...',
       data: fetchAllRecipes,
-    });
+      pagination,
+    };
+
+    res.status(200).json(response);
   } catch (err: any) {
     // console.error(err); ////
     // if (err instanceof Error) {

@@ -23,3 +23,25 @@ export interface Instruction_TS {
   stepNumber: number;
   instruction: { id: number; step: string };
 }
+
+export interface RecipeQueryParams {
+  page?: string;
+  limit?: string;
+  category?: string;
+  isVegetarian?: string;
+  time?: string;
+}
+
+export interface PaginationMetadata {
+  total: number;
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+}
+
+export interface GetAllRecipesResponse {
+  success: boolean;
+  message: string;
+  data: Recipe_TS[];
+  pagination: PaginationMetadata;
+}
