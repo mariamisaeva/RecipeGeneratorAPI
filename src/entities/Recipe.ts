@@ -43,10 +43,10 @@ export class Recipe {
   @Column({ default: false })
   isVegetarian!: boolean;
 
-  @Column({ default: 1 })
+  @Column({ default: 0 })
   servings!: number;
 
-  @Column()
+  @Column({ nullable: true })
   time!: string;
 
   @Column({ default: 'no-image.png' })
@@ -80,4 +80,10 @@ export class Recipe {
 
   @OneToMany(() => FavoriteRecipe, (fr) => fr.recipe)
   favoritedBy!: FavoriteRecipe[];
+}
+function OrderBy(
+  arg0: string,
+  arg1: string,
+): (target: Recipe, propertyKey: '') => void {
+  throw new Error('Function not implemented.');
 }

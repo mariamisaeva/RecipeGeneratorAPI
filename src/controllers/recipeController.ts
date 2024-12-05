@@ -42,21 +42,6 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
 
     if (time) filters.time = time;
 
-    console.log(
-      AppDataSource.createQueryBuilder(Recipe, 'recipe')
-        .leftJoinAndSelect('recipe.ingredients', 'ingredients')
-        .leftJoinAndSelect('ingredients.ingredient', 'ingredient')
-        .leftJoinAndSelect('recipe.instructions', 'instructions')
-        .leftJoinAndSelect('instructions.instruction', 'instruction')
-        .where(filters)
-        .orderBy('recipe.id', 'ASC')
-        .addOrderBy('ingredients.indexNumber', 'ASC')
-        .addOrderBy('instructions.stepNumber', 'ASC')
-        .skip(offset)
-        .take(pageSize)
-        .getSql(),
-    ); ////
-
     const [fetchAllRecipes, total] = await recipeRepository.findAndCount({
       where: filters,
       relations: [
@@ -67,12 +52,12 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
       ],
       order: {
         id: 'DESC', //sort by id in recipes ascending
-        // ingredients: {
-        //   indexNumber: 'ASC', //sort by orderIndex in ingredients
-        // },
-        // instructions: {
-        //   stepNumber: 'ASC', //sort by stepNumber in instructions ascending}
-        // },
+        ingredients: {
+          indexNumber: 'ASC', //sort by orderIndex in ingredients
+        },
+        instructions: {
+          stepNumber: 'ASC', //sort by stepNumber in instructions ascending}
+        },
       },
       skip: offset,
       take: pageSize,
@@ -271,10 +256,11 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
     Object.assign(existingRecipe, {
       ...(title && { title }),
       ...(description && { description }),
-      ...(isVegetarian && { isVegetarian }),
       ...(servings && { servings }),
       ...(time && { time }),
       ...(image && { image }),
+      isVegetarian:
+        isVegetarian !== undefined ? isVegetarian : existingRecipe.isVegetarian,
     });
     //handle category
     if (category) {
