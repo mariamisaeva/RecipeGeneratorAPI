@@ -88,22 +88,6 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
       pageSize,
     };
 
-    // // Sort the nested relations manually
-    // fetchAllRecipes.forEach((recipe) => {
-    //   recipe.ingredients.sort((a, b) => a.indexNumber - b.indexNumber);
-    //   recipe.instructions.sort((a, b) => a.stepNumber - b.stepNumber);
-    // });
-    // // Ensure ingredients and instructions are sorted in the response
-    // const formattedRecipes = fetchAllRecipes.map((recipe) => ({
-    //   ...recipe,
-    //   ingredients: recipe.ingredients.sort(
-    //     (a, b) => a.indexNumber - b.indexNumber,
-    //   ),
-    //   instructions: recipe.instructions.sort(
-    //     (a, b) => a.stepNumber - b.stepNumber,
-    //   ),
-    // }));
-
     const response: GetAllRecipesResponse = {
       success: true,
       message: 'Getting all recipes...',
