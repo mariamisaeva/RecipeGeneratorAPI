@@ -81,9 +81,9 @@ export class Recipe {
   @OneToMany(() => FavoriteRecipe, (fr) => fr.recipe)
   favoritedBy!: FavoriteRecipe[];
 }
-function OrderBy(
-  arg0: string,
-  arg1: string,
-): (target: Recipe, propertyKey: '') => void {
-  throw new Error('Function not implemented.');
-}
+// function OrderBy(
+//   arg0: string,
+//   arg1: string,
+// ): (target: Recipe, propertyKey: '') => void {
+//   throw new Error('Function not implemented.');
+// }

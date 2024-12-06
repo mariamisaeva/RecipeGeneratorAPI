@@ -25,6 +25,7 @@ export interface Instruction_TS {
 }
 
 export interface RecipeQueryParams {
+  keyword?: string;
   page?: string;
   limit?: string;
   category?: string;

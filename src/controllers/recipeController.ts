@@ -14,6 +14,7 @@ import {
   handleUpdateInstructions,
 } from '../utils/helpers';
 import { CategoryEnum } from '../entities/Recipe';
+import { ILike } from 'typeorm';
 
 //GetAllRecipes
 const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
@@ -23,6 +24,7 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
     const recipeRepository = AppDataSource.getRepository(Recipe);
     //get query params
     const {
+      keyword = '',
       page = 1,
       limit = 10,
       category,
@@ -35,15 +37,28 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
     const offset = (pageNumber - 1) * pageSize;
 
     //built dynamic query filters
-    const filters: any = {};
-    if (category) filters.category = category as CategoryEnum;
-
-    if (isVegetarian) filters.isVegetarian = isVegetarian === 'true';
-
-    if (time) filters.time = time;
+    //
+    const filters: any = {
+      ...(category && {
+        category: (category as string).toLowerCase() as CategoryEnum,
+      }),
+      ...(isVegetarian && { isVegetarian: isVegetarian === 'true' }),
+      ...(time && { time: parseInt(time, 10) }),
+    };
 
     const [fetchAllRecipes, total] = await recipeRepository.findAndCount({
-      where: filters,
+      where: [
+        { title: ILike(`%${keyword}%`), ...filters },
+        { description: ILike(`%${keyword}%`), ...filters },
+        {
+          ingredients: { ingredient: { name: ILike(`%${keyword}%`) } },
+          ...filters,
+        },
+        {
+          instructions: { instruction: { step: ILike(`%${keyword}%`) } },
+          ...filters,
+        },
+      ],
       relations: [
         'ingredients',
         'ingredients.ingredient',
@@ -52,12 +67,12 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
       ],
       order: {
         id: 'DESC', //sort by id in recipes ascending
-        ingredients: {
-          indexNumber: 'ASC', //sort by orderIndex in ingredients
-        },
-        instructions: {
-          stepNumber: 'ASC', //sort by stepNumber in instructions ascending}
-        },
+        // ingredients: {
+        //   indexNumber: 'ASC', //sort by orderIndex in ingredients
+        // },
+        // instructions: {
+        //   stepNumber: 'ASC', //sort by stepNumber in instructions ascending}
+        // },
       },
       skip: offset,
       take: pageSize,
@@ -65,12 +80,33 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
 
     console.log(fetchAllRecipes); ////
 
+    if (fetchAllRecipes.length === 0) {
+      res.status(404).json({ success: false, message: 'No recipes found' });
+      return;
+    }
+
     const pagination: PaginationMetadata = {
       total,
       currentPage: pageNumber,
       totalPages: Math.ceil(total / pageSize),
       pageSize,
     };
+
+    // // Sort the nested relations manually
+    // fetchAllRecipes.forEach((recipe) => {
+    //   recipe.ingredients.sort((a, b) => a.indexNumber - b.indexNumber);
+    //   recipe.instructions.sort((a, b) => a.stepNumber - b.stepNumber);
+    // });
+    // // Ensure ingredients and instructions are sorted in the response
+    // const formattedRecipes = fetchAllRecipes.map((recipe) => ({
+    //   ...recipe,
+    //   ingredients: recipe.ingredients.sort(
+    //     (a, b) => a.indexNumber - b.indexNumber,
+    //   ),
+    //   instructions: recipe.instructions.sort(
+    //     (a, b) => a.stepNumber - b.stepNumber,
+    //   ),
+    // }));
 
     const response: GetAllRecipesResponse = {
       success: true,
@@ -193,6 +229,7 @@ const getRecipeById = async (req: Request, res: Response) => {
 
     if (!recipe) {
       res.status(404).json({ success: false, message: 'Recipe not found' });
+      return;
     }
 
     res.status(200).json({
