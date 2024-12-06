@@ -97,10 +97,6 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json(response);
   } catch (err: any) {
-    // console.error(err); ////
-    // if (err instanceof Error) {
-    //   res.status(500).json({ success: false, message: err.message });
-    // }
     res.status(500).json({
       success: false,
       message: err.message,
