@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  JoinTable,
 } from 'typeorm';
 import { RecipeInstruction } from './RecipeInstruction';
 import { RecipeIngredient } from './RecipeIngredient';

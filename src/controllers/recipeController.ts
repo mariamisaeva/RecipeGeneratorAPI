@@ -67,12 +67,8 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
       ],
       order: {
         id: 'DESC', //sort by id in recipes ascending
-        // ingredients: {
-        //   indexNumber: 'ASC', //sort by orderIndex in ingredients
-        // },
-        // instructions: {
-        //   stepNumber: 'ASC', //sort by stepNumber in instructions ascending}
-        // },
+        ingredients: { indexNumber: 'ASC' },
+        instructions: { stepNumber: 'ASC' },
       },
       skip: offset,
       take: pageSize,
