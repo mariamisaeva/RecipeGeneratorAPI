@@ -18,8 +18,6 @@ import { ILike } from 'typeorm';
 
 //GetAllRecipes
 const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
-  console.log('getAllRecipes Controller is Working...'); ////
-
   try {
     const recipeRepository = AppDataSource.getRepository(Recipe);
     //get query params
@@ -31,7 +29,6 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
       isVegetarian,
       time,
     } = req.query as unknown as RecipeQueryParams;
-    // console.log('Query Params:', req.query); ////
     const pageNumber = parseInt(page as string, 10); //Number(page);
     const pageSize = parseInt(limit as string, 10); //Number(limit);
     const offset = (pageNumber - 1) * pageSize;
