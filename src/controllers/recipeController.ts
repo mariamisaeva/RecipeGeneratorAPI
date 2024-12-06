@@ -201,7 +201,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
     const recipeRepository = AppDataSource.getRepository(Recipe);
     const { id } = req.params;
 
-    // console.log('req.body: ', req.body);
     const {
       title,
       description,
