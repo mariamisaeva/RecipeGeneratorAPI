@@ -102,12 +102,6 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
 //CreateRecipe
 const createRecipe = async (req: Request, res: Response): Promise<void> => {
   try {
-    //1. get repos
-    //2. destruct the contained data in body request
-    //3. create new recipe in the repo with destructured data
-    //4. handle ings and insts (if not exists create them)
-    //4. save it - await
-    //send response
     const {
       title,
       description,
