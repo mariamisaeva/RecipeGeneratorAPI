@@ -299,19 +299,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
     }
 
     if (instructions) {
-      //   const formattedInstructions = instructions.map((ins: any) => ({
-      //     id: ins.id,
-      //     stepNumber: ins.stepNumber,
-      //     instruction: {
-      //       id: ins.instruction?.id,
-      //       step: ins.instruction?.step,
-      //     },
-      //   }));
-      //   console.log(
-      //     'Formatted Instructions for handleInstructions:',
-      //     formattedInstructions,
-      //   );
-
       await handleUpdateInstructions(instructions, existingRecipe);
     }
 
