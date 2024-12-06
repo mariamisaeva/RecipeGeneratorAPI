@@ -135,14 +135,9 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
     });
 
     await recipeRepository.save(newRecipe);
-    console.log('Ingredients before Handle: ', ingredients); ////
 
     await handleIngredients(ingredients, newRecipe);
     await handleInstructions(instructions, newRecipe);
-
-    console.log('Ingredients: ', ingredients); ////
-    // console.log('Instructions: ', insts); ////
-    console.log('NEW RECIPE: ', newRecipe); ////
 
     const fullNewRecipe = await recipeRepository.findOne({
       where: { id: newRecipe.id },
