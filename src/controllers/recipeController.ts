@@ -162,11 +162,8 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
 //================================================================//
 //GetRecipeById
 const getRecipeById = async (req: Request, res: Response) => {
-  console.log('getRecipeById Controller is Working...'); ////
-
   try {
     const { id } = req.params;
-    // console.log(id); ////
 
     const recipeRepository = AppDataSource.getRepository(Recipe);
 
@@ -179,8 +176,6 @@ const getRecipeById = async (req: Request, res: Response) => {
         'instructions.instruction',
       ],
     });
-
-    // console.log(recipe); ////
 
     if (!recipe) {
       res.status(404).json({ success: false, message: 'Recipe not found' });
