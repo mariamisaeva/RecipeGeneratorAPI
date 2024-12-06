@@ -149,8 +149,6 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
       ],
     });
 
-    // console.log(fullNewRecipe);
-
     res.status(201).json({
       success: true,
       message: 'Recipe created successfully',
