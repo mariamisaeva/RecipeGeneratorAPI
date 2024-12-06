@@ -213,8 +213,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
       instructions,
     }: Partial<Recipe_TS> = req.body; // Partial<Recipe_TS> - all fields are optional
 
-    // console.log('req.body: ', req.body);
-
     const existingRecipe = await recipeRepository.findOne({
       where: { id: Number(id) },
       relations: [
@@ -224,7 +222,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
         'instructions.instruction',
       ],
     });
-    // console.log(existingRecipe); ////
 
     if (!existingRecipe) {
       res.status(404).json({ success: false, message: 'Recipe not found' });
@@ -263,12 +260,7 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
     }
 
     if (ingredients) {
-      console.log('Raw Ingredients:, ', ingredients); ////
       await handleUpdateIngredients(ingredients, existingRecipe);
-
-      //   console.log('Formatted Ingredients:', formattedIngredients); ////
-      //   await handleIngredients(ingredients, existingRecipe);
-      console.log('Ingredients updated successfully.');
     }
 
     if (instructions) {
@@ -286,7 +278,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
         'instructions.instruction',
       ],
     });
-    console.log(updatedRecipe); ////
 
     res.status(200).json({
       success: true,
@@ -294,7 +285,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
       data: updatedRecipe,
     });
   } catch (err: any) {
-    console.error('Error in updateRecipe:', err); // Debug log
     res.status(500).json({ success: false, message: err.message });
   }
 };
