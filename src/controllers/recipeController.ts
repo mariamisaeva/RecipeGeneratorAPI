@@ -292,15 +292,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
     if (ingredients) {
       console.log('Raw Ingredients:, ', ingredients); ////
       await handleUpdateIngredients(ingredients, existingRecipe);
-      //   const formattedIngredients = ingredients.map((ing: any) => ({
-      //     // id: ing.id, //RecipeIngredient ID
-      //     quantity: ing.quantity,
-      //     unit: ing.unit,
-      //     ingredient: {
-      //       //   id: ing.ingredient?.id,
-      //       name: ing.ingredient?.name,
-      //     },
-      //   }));
 
       //   console.log('Formatted Ingredients:', formattedIngredients); ////
       //   await handleIngredients(ingredients, existingRecipe);
