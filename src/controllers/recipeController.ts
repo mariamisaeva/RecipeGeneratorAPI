@@ -101,8 +101,6 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
 //================================================================//
 //CreateRecipe
 const createRecipe = async (req: Request, res: Response): Promise<void> => {
-  console.log('createRecipe Controller is Working...'); ////
-
   try {
     //1. get repos
     //2. destruct the contained data in body request
