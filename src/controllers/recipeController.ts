@@ -29,12 +29,11 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
       isVegetarian,
       time,
     } = req.query as unknown as RecipeQueryParams;
-    const pageNumber = parseInt(page as string, 10); //Number(page);
-    const pageSize = parseInt(limit as string, 10); //Number(limit);
+    const pageNumber = parseInt(page as string, 10);
+    const pageSize = parseInt(limit as string, 10);
     const offset = (pageNumber - 1) * pageSize;
 
-    //built dynamic query filters
-    //
+    //query filters
     const filters: any = {
       ...(category && {
         category: (category as string).toLowerCase() as CategoryEnum,
