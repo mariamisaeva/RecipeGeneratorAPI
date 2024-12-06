@@ -70,8 +70,6 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
       take: pageSize,
     });
 
-    console.log(fetchAllRecipes); ////
-
     if (fetchAllRecipes.length === 0) {
       res.status(404).json({ success: false, message: 'No recipes found' });
       return;
