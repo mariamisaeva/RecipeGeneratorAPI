@@ -2,10 +2,17 @@ import { Request, Response } from 'express';
 import {
   getAllRecipes,
   createRecipe,
+  getRecipeById,
+  updateRecipe,
 } from '../src/controllers/recipeController';
 import { AppDataSource } from '../src/config/database';
 import { Recipe } from '../src/entities/Recipe';
-import { handleIngredients, handleInstructions } from '../src/utils/helpers';
+import {
+  handleIngredients,
+  handleInstructions,
+  handleUpdateIngredients,
+  handleUpdateInstructions,
+} from '../src/utils/helpers';
 import { ILike } from 'typeorm';
 
 jest.mock('../src/config/database', () => ({
@@ -17,6 +24,11 @@ jest.mock('../src/config/database', () => ({
 jest.mock('../src/utils/helpers', () => ({
   handleIngredients: jest.fn(),
   handleInstructions: jest.fn(),
+}));
+
+jest.mock('../utils/helpers', () => ({
+  handleUpdateIngredients: jest.fn(),
+  handleUpdateInstructions: jest.fn(),
 }));
 
 describe('getAllRecipes Controller', () => {
@@ -203,6 +215,96 @@ describe('createRecipe Controller', () => {
     });
 
     await createRecipe(mockRequest as Request, mockResponse as Response);
+
+    expect(mockResponse.status).toHaveBeenCalledWith(500);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'Database error',
+    });
+  });
+});
+
+//================================================================//
+//GetRecipeById
+describe('getRecipeById Controller', () => {
+  let mockRequest: Partial<Request>;
+  let mockResponse: Partial<Response>;
+  let mockRecipeRepository: any;
+
+  beforeEach(() => {
+    mockRequest = {};
+    mockResponse = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    mockRecipeRepository = {
+      findOne: jest.fn(),
+    };
+    (AppDataSource.getRepository as jest.Mock).mockReturnValue(
+      mockRecipeRepository,
+    );
+  });
+
+  it('should return the recipe if found', async () => {
+    mockRequest.params = { id: '1' };
+
+    const mockRecipe = {
+      id: 1,
+      title: 'Pasta',
+      ingredients: [],
+      instructions: [],
+    };
+
+    mockRecipeRepository.findOne.mockResolvedValue(mockRecipe);
+
+    await getRecipeById(mockRequest as Request, mockResponse as Response);
+
+    expect(mockRecipeRepository.findOne).toHaveBeenCalledWith({
+      where: { id: 1 },
+      relations: [
+        'ingredients',
+        'ingredients.ingredient',
+        'instructions',
+        'instructions.instruction',
+      ],
+    });
+    expect(mockResponse.status).toHaveBeenCalledWith(200);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: true,
+      message: 'Getting recipe by id...',
+      data: mockRecipe,
+    });
+  });
+
+  it('should return 404 if the recipe is not found', async () => {
+    mockRequest.params = { id: '2' };
+
+    mockRecipeRepository.findOne.mockResolvedValue(null);
+
+    await getRecipeById(mockRequest as Request, mockResponse as Response);
+
+    expect(mockRecipeRepository.findOne).toHaveBeenCalledWith({
+      where: { id: 2 },
+      relations: [
+        'ingredients',
+        'ingredients.ingredient',
+        'instructions',
+        'instructions.instruction',
+      ],
+    });
+    expect(mockResponse.status).toHaveBeenCalledWith(404);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'Recipe not found',
+    });
+  });
+
+  it('should return 500 if there is a server error', async () => {
+    mockRequest.params = { id: '3' };
+
+    mockRecipeRepository.findOne.mockRejectedValue(new Error('Database error'));
+
+    await getRecipeById(mockRequest as Request, mockResponse as Response);
 
     expect(mockResponse.status).toHaveBeenCalledWith(500);
     expect(mockResponse.json).toHaveBeenCalledWith({
