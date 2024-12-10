@@ -12,7 +12,7 @@ export interface Recipe_TS {
 
 export interface Ingredient_TS {
   id?: number;
-  ingredient: { id: number; name: string };
+  ingredient: { id?: number; name: string };
   quantity: number;
   unit: string;
   //   indexNumber: number;
