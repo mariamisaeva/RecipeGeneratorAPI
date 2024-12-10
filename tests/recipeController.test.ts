@@ -313,3 +313,135 @@ describe('getRecipeById Controller', () => {
     });
   });
 });
+
+//================================================================//
+// updateRecipe
+describe('updateRecipe Controller', () => {
+  let mockRequest: Partial<Request>;
+  let mockResponse: Partial<Response>;
+  let mockRecipeRepository: any;
+
+  beforeEach(() => {
+    mockRequest = {};
+    mockResponse = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    mockRecipeRepository = {
+      findOne: jest.fn(),
+      save: jest.fn(),
+    };
+    (AppDataSource.getRepository as jest.Mock).mockReturnValue(
+      mockRecipeRepository,
+    );
+  });
+
+  it('should successfully update a recipe', async () => {
+    mockRequest.params = { id: '1' };
+    mockRequest.body = {
+      title: 'Updated Recipe',
+      category: 'dessert',
+      ingredients: [
+        { ingredient: { name: 'Sugar' }, quantity: 2, unit: 'tbsp' },
+      ],
+      instructions: [{ instruction: { step: 'Mix' }, stepNumber: 1 }],
+    };
+
+    const mockRecipe = {
+      id: 1,
+      title: 'Old Recipe',
+      ingredients: [],
+      instructions: [],
+    };
+    const updatedRecipe = {
+      ...mockRecipe,
+      title: 'Updated Recipe',
+      category: 'dessert',
+    };
+
+    mockRecipeRepository.findOne.mockResolvedValue(mockRecipe);
+    mockRecipeRepository.save.mockResolvedValue(updatedRecipe);
+
+    (handleUpdateIngredients as jest.Mock).mockResolvedValue([]);
+    (handleUpdateInstructions as jest.Mock).mockResolvedValue([]);
+
+    await updateRecipe(mockRequest as Request, mockResponse as Response);
+
+    expect(mockRecipeRepository.findOne).toHaveBeenCalledWith({
+      where: { id: 1 },
+      relations: [
+        'ingredients',
+        'ingredients.ingredient',
+        'instructions',
+        'instructions.instruction',
+      ],
+    });
+    expect(mockRecipeRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Updated Recipe', category: 'dessert' }),
+    );
+    expect(handleUpdateIngredients).toHaveBeenCalled();
+    expect(handleUpdateInstructions).toHaveBeenCalled();
+    expect(mockResponse.status).toHaveBeenCalledWith(200);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: true,
+      message: 'Recipe updated successfully',
+      data: updatedRecipe,
+    });
+  });
+
+  it('should return 404 if the recipe is not found', async () => {
+    mockRequest.params = { id: '2' };
+    mockRequest.body = { title: 'Updated Recipe' };
+
+    mockRecipeRepository.findOne.mockResolvedValue(null);
+
+    await updateRecipe(mockRequest as Request, mockResponse as Response);
+
+    expect(mockRecipeRepository.findOne).toHaveBeenCalledWith({
+      where: { id: 2 },
+      relations: [
+        'ingredients',
+        'ingredients.ingredient',
+        'instructions',
+        'instructions.instruction',
+      ],
+    });
+    expect(mockResponse.status).toHaveBeenCalledWith(404);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'Recipe not found',
+    });
+  });
+
+  it('should return 400 for invalid category', async () => {
+    mockRequest.params = { id: '1' };
+    mockRequest.body = { category: 'invalid_category' };
+
+    const mockRecipe = { id: 1, title: 'Old Recipe' };
+
+    mockRecipeRepository.findOne.mockResolvedValue(mockRecipe);
+
+    await updateRecipe(mockRequest as Request, mockResponse as Response);
+
+    expect(mockResponse.status).toHaveBeenCalledWith(400);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: false,
+      message: expect.stringContaining('Invalid category'),
+    });
+  });
+
+  it('should return 500 for server error', async () => {
+    mockRequest.params = { id: '3' };
+    mockRequest.body = { title: 'Updated Recipe' };
+
+    mockRecipeRepository.findOne.mockRejectedValue(new Error('Database error'));
+
+    await updateRecipe(mockRequest as Request, mockResponse as Response);
+
+    expect(mockResponse.status).toHaveBeenCalledWith(500);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'Database error',
+    });
+  });
+});
