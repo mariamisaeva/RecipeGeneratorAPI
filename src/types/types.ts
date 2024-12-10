@@ -21,7 +21,7 @@ export interface Ingredient_TS {
 export interface Instruction_TS {
   id?: number;
   stepNumber: number;
-  instruction: { id: number; step: string };
+  instruction: { id?: number; step: string };
 }
 
 export interface RecipeQueryParams {
