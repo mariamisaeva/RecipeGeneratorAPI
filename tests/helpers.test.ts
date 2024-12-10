@@ -253,3 +253,130 @@ describe('handleInstructions Function', () => {
     ).rejects.toThrow('Instruction step is required.');
   });
 });
+
+//HandleUpdateIngredients
+describe('handleUpdateIngredients Function', () => {
+  let mockIngredientsRepository: any;
+  let mockRecipeIngredientRepository: any;
+
+  beforeEach(() => {
+    mockIngredientsRepository = {
+      findOneBy: jest.fn(),
+      create: jest.fn(),
+      save: jest.fn(),
+    };
+    mockRecipeIngredientRepository = {
+      findOne: jest.fn(),
+      create: jest.fn(),
+      save: jest.fn(),
+      remove: jest.fn(),
+      find: jest.fn(),
+    };
+
+    (AppDataSource.getRepository as jest.Mock)
+      .mockImplementationOnce(() => mockIngredientsRepository)
+      .mockImplementationOnce(() => mockRecipeIngredientRepository);
+  });
+
+  it('should update existing ingredients and add new ones', async () => {
+    const mockRecipe = {
+      id: 1,
+      ingredients: [{ id: 1, ingredient: { name: 'Salt' } }],
+    } as any;
+
+    const mockIngredients = [
+      { id: 1, quantity: 2, unit: 'tsp', ingredient: { id: 1, name: 'Salt' } },
+      { quantity: 1, unit: 'tbsp', ingredient: { name: 'Sugar' } },
+    ];
+
+    const mockUpdatedIngredient = {
+      id: 1,
+      quantity: 2,
+      unit: 'tsp',
+      ingredient: { id: 1, name: 'Salt' },
+    };
+
+    const mockNewIngredient = { id: 2, name: 'Sugar' };
+    const mockNewRecipeIngredient = {
+      id: 2,
+      ingredient: mockNewIngredient,
+      quantity: 1,
+      unit: 'tbsp',
+    };
+
+    mockIngredientsRepository.findOneBy
+      .mockResolvedValueOnce({ id: 1, name: 'Salt' })
+      .mockResolvedValueOnce(null);
+
+    mockIngredientsRepository.create.mockReturnValue(mockNewIngredient);
+    mockIngredientsRepository.save.mockResolvedValue(mockNewIngredient);
+
+    mockRecipeIngredientRepository.findOne.mockResolvedValueOnce(
+      mockUpdatedIngredient,
+    );
+
+    mockRecipeIngredientRepository.create.mockReturnValue(
+      mockNewRecipeIngredient,
+    );
+    mockRecipeIngredientRepository.save.mockResolvedValueOnce(
+      mockUpdatedIngredient,
+    );
+    mockRecipeIngredientRepository.save.mockResolvedValueOnce(
+      mockNewRecipeIngredient,
+    );
+
+    const result = await handleUpdateIngredients(mockIngredients, mockRecipe);
+
+    expect(result).toEqual([mockUpdatedIngredient, mockNewRecipeIngredient]);
+    expect(mockIngredientsRepository.findOneBy).toHaveBeenCalledTimes(2);
+    expect(mockRecipeIngredientRepository.save).toHaveBeenCalledTimes(2);
+  });
+
+  it('should throw an error if ingredient name or id is missing', async () => {
+    const mockRecipe = { id: 1, ingredients: [] } as any;
+
+    const mockIngredients = [
+      { quantity: 1, unit: 'tbsp', ingredient: { name: '' } },
+    ];
+
+    await expect(
+      handleUpdateIngredients(mockIngredients, mockRecipe),
+    ).rejects.toThrow('Ingredient name or id is required');
+  });
+
+  it('should remove excluded ingredients', async () => {
+    const mockRecipe = {
+      id: 1,
+      ingredients: [
+        { id: 1, ingredient: { name: 'Salt' } },
+        { id: 2, ingredient: { name: 'Pepper' } },
+      ],
+    } as any;
+
+    const mockIngredients = [
+      { id: 1, quantity: 2, unit: 'tsp', ingredient: { id: 1, name: 'Salt' } },
+    ];
+
+    const mockUpdatedIngredient = {
+      id: 1,
+      quantity: 2,
+      unit: 'tsp',
+      ingredient: { id: 1, name: 'Salt' },
+    };
+
+    mockRecipeIngredientRepository.findOne.mockResolvedValueOnce(
+      mockUpdatedIngredient,
+    );
+    mockRecipeIngredientRepository.save.mockResolvedValueOnce(
+      mockUpdatedIngredient,
+    );
+    mockRecipeIngredientRepository.remove.mockResolvedValueOnce(undefined);
+
+    const result = await handleUpdateIngredients(mockIngredients, mockRecipe);
+
+    expect(result).toEqual([mockUpdatedIngredient]);
+    expect(mockRecipeIngredientRepository.remove).toHaveBeenCalledWith([
+      { id: 2, ingredient: { name: 'Pepper' } },
+    ]);
+  });
+});
