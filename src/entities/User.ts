@@ -1,33 +1,33 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
-  CreateDateColumn,
-} from 'typeorm';
-import { Recipe } from './Recipe';
-import { FavoriteRecipe } from './FavoriteRecipe';
+// import {
+//   Entity,
+//   PrimaryGeneratedColumn,
+//   Column,
+//   OneToMany,
+//   CreateDateColumn,
+// } from 'typeorm';
+// import { Recipe } from './Recipe';
+// import { FavoriteRecipe } from './FavoriteRecipe';
 
-@Entity()
-export class User {
-  @PrimaryGeneratedColumn()
-  id!: number;
+// @Entity()
+// export class User {
+//   @PrimaryGeneratedColumn()
+//   id!: number;
 
-  @Column({ unique: true })
-  username!: string;
+//   @Column({ unique: true })
+//   username!: string;
 
-  @Column({ unique: true })
-  email!: string;
+//   @Column({ unique: true })
+//   email!: string;
 
-  @Column()
-  password!: string;
+//   @Column()
+//   password!: string;
 
-  @OneToMany(() => Recipe, (r) => r.author)
-  recipes!: Recipe[];
+//   @OneToMany(() => Recipe, (r) => r.author)
+//   recipes!: Recipe[];
 
-  @CreateDateColumn()
-  createdAt!: Date;
+//   @CreateDateColumn()
+//   createdAt!: Date;
 
-  @OneToMany(() => FavoriteRecipe, (fr) => fr.user)
-  favoriteRecipes!: FavoriteRecipe[];
-}
+//   @OneToMany(() => FavoriteRecipe, (fr) => fr.user)
+//   favoriteRecipes!: FavoriteRecipe[];
+// }

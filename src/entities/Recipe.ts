@@ -6,11 +6,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  JoinTable,
 } from 'typeorm';
 import { RecipeInstruction } from './RecipeInstruction';
 import { RecipeIngredient } from './RecipeIngredient';
-import { User } from './User';
-import { FavoriteRecipe } from './FavoriteRecipe';
+// import { User } from './User';
+// import { FavoriteRecipe } from './FavoriteRecipe';
 
 export enum CategoryEnum {
   Breakfast = 'breakfast',
@@ -43,10 +44,10 @@ export class Recipe {
   @Column({ default: false })
   isVegetarian!: boolean;
 
-  @Column({ default: 1 })
+  @Column({ default: 0 })
   servings!: number;
 
-  @Column()
+  @Column({ nullable: true })
   time!: string;
 
   @Column({ default: 'no-image.png' })
@@ -72,12 +73,12 @@ export class Recipe {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @ManyToOne(() => User, (u) => u.recipes, { onDelete: 'CASCADE' })
-  author!: User; //User who created the recipe
+  //   @ManyToOne(() => User, (u) => u.recipes, { onDelete: 'CASCADE' })
+  //   author!: User; //User who created the recipe
 
   @Column({ default: 0 })
   favCounter!: number;
 
-  @OneToMany(() => FavoriteRecipe, (fr) => fr.recipe)
-  favoritedBy!: FavoriteRecipe[];
+  //   @OneToMany(() => FavoriteRecipe, (fr) => fr.recipe)
+  //   favoritedBy!: FavoriteRecipe[];
 }

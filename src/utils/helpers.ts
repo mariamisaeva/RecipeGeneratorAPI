@@ -81,6 +81,11 @@ export const handleInstructions = async (
   for (const {
     instruction: { step },
   } of instructions) {
+    // Validation for missing or empty step
+    if (!step || step.trim() === '') {
+      throw new Error('Instruction step is required.');
+    }
+
     //USING TO CREATE A NEW INSTRUCTION (create-recipe)
     let singleInstruction = await instructionsRepository.findOneBy({ step });
 

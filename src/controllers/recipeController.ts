@@ -14,51 +14,47 @@ import {
   handleUpdateInstructions,
 } from '../utils/helpers';
 import { CategoryEnum } from '../entities/Recipe';
+import { ILike } from 'typeorm';
 
 //GetAllRecipes
 const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
-  console.log('getAllRecipes Controller is Working...'); ////
-
   try {
     const recipeRepository = AppDataSource.getRepository(Recipe);
     //get query params
     const {
+      keyword = '',
       page = 1,
       limit = 10,
       category,
       isVegetarian,
       time,
     } = req.query as unknown as RecipeQueryParams;
-    // console.log('Query Params:', req.query); ////
-    const pageNumber = parseInt(page as string, 10); //Number(page);
-    const pageSize = parseInt(limit as string, 10); //Number(limit);
+    const pageNumber = parseInt(page as string, 10);
+    const pageSize = parseInt(limit as string, 10);
     const offset = (pageNumber - 1) * pageSize;
 
-    //built dynamic query filters
-    const filters: any = {};
-    if (category) filters.category = category as CategoryEnum;
-
-    if (isVegetarian) filters.isVegetarian = isVegetarian === 'true';
-
-    if (time) filters.time = time;
-
-    console.log(
-      AppDataSource.createQueryBuilder(Recipe, 'recipe')
-        .leftJoinAndSelect('recipe.ingredients', 'ingredients')
-        .leftJoinAndSelect('ingredients.ingredient', 'ingredient')
-        .leftJoinAndSelect('recipe.instructions', 'instructions')
-        .leftJoinAndSelect('instructions.instruction', 'instruction')
-        .where(filters)
-        .orderBy('recipe.id', 'ASC')
-        .addOrderBy('ingredients.indexNumber', 'ASC')
-        .addOrderBy('instructions.stepNumber', 'ASC')
-        .skip(offset)
-        .take(pageSize)
-        .getSql(),
-    ); ////
+    //query filters
+    const filters: any = {
+      ...(category && {
+        category: (category as string).toLowerCase() as CategoryEnum,
+      }),
+      ...(isVegetarian && { isVegetarian: isVegetarian === 'true' }),
+      ...(time && { time: parseInt(time, 10) }),
+    };
 
     const [fetchAllRecipes, total] = await recipeRepository.findAndCount({
-      where: filters,
+      where: [
+        { title: ILike(`%${keyword}%`), ...filters },
+        { description: ILike(`%${keyword}%`), ...filters },
+        {
+          ingredients: { ingredient: { name: ILike(`%${keyword}%`) } },
+          ...filters,
+        },
+        {
+          instructions: { instruction: { step: ILike(`%${keyword}%`) } },
+          ...filters,
+        },
+      ],
       relations: [
         'ingredients',
         'ingredients.ingredient',
@@ -67,18 +63,17 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
       ],
       order: {
         id: 'DESC', //sort by id in recipes ascending
-        // ingredients: {
-        //   indexNumber: 'ASC', //sort by orderIndex in ingredients
-        // },
-        // instructions: {
-        //   stepNumber: 'ASC', //sort by stepNumber in instructions ascending}
-        // },
+        ingredients: { indexNumber: 'ASC' },
+        instructions: { stepNumber: 'ASC' },
       },
       skip: offset,
       take: pageSize,
     });
 
-    console.log(fetchAllRecipes); ////
+    if (fetchAllRecipes.length === 0) {
+      res.status(404).json({ success: false, message: 'No recipes found' });
+      return;
+    }
 
     const pagination: PaginationMetadata = {
       total,
@@ -96,10 +91,6 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json(response);
   } catch (err: any) {
-    // console.error(err); ////
-    // if (err instanceof Error) {
-    //   res.status(500).json({ success: false, message: err.message });
-    // }
     res.status(500).json({
       success: false,
       message: err.message,
@@ -110,15 +101,7 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
 //================================================================//
 //CreateRecipe
 const createRecipe = async (req: Request, res: Response): Promise<void> => {
-  console.log('createRecipe Controller is Working...'); ////
-
   try {
-    //1. get repos
-    //2. destruct the contained data in body request
-    //3. create new recipe in the repo with destructured data
-    //4. handle ings and insts (if not exists create them)
-    //4. save it - await
-    //send response
     const {
       title,
       description,
@@ -152,14 +135,9 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
     });
 
     await recipeRepository.save(newRecipe);
-    console.log('Ingredients before Handle: ', ingredients); ////
 
     await handleIngredients(ingredients, newRecipe);
     await handleInstructions(instructions, newRecipe);
-
-    console.log('Ingredients: ', ingredients); ////
-    // console.log('Instructions: ', insts); ////
-    console.log('NEW RECIPE: ', newRecipe); ////
 
     const fullNewRecipe = await recipeRepository.findOne({
       where: { id: newRecipe.id },
@@ -170,8 +148,6 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
         'instructions.instruction',
       ],
     });
-
-    // console.log(fullNewRecipe);
 
     res.status(201).json({
       success: true,
@@ -186,11 +162,8 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
 //================================================================//
 //GetRecipeById
 const getRecipeById = async (req: Request, res: Response) => {
-  console.log('getRecipeById Controller is Working...'); ////
-
   try {
     const { id } = req.params;
-    // console.log(id); ////
 
     const recipeRepository = AppDataSource.getRepository(Recipe);
 
@@ -204,10 +177,9 @@ const getRecipeById = async (req: Request, res: Response) => {
       ],
     });
 
-    // console.log(recipe); ////
-
     if (!recipe) {
       res.status(404).json({ success: false, message: 'Recipe not found' });
+      return;
     }
 
     res.status(200).json({
@@ -229,7 +201,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
     const recipeRepository = AppDataSource.getRepository(Recipe);
     const { id } = req.params;
 
-    // console.log('req.body: ', req.body);
     const {
       title,
       description,
@@ -242,8 +213,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
       instructions,
     }: Partial<Recipe_TS> = req.body; // Partial<Recipe_TS> - all fields are optional
 
-    // console.log('req.body: ', req.body);
-
     const existingRecipe = await recipeRepository.findOne({
       where: { id: Number(id) },
       relations: [
@@ -253,7 +222,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
         'instructions.instruction',
       ],
     });
-    // console.log(existingRecipe); ////
 
     if (!existingRecipe) {
       res.status(404).json({ success: false, message: 'Recipe not found' });
@@ -271,10 +239,11 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
     Object.assign(existingRecipe, {
       ...(title && { title }),
       ...(description && { description }),
-      ...(isVegetarian && { isVegetarian }),
       ...(servings && { servings }),
       ...(time && { time }),
       ...(image && { image }),
+      isVegetarian:
+        isVegetarian !== undefined ? isVegetarian : existingRecipe.isVegetarian,
     });
     //handle category
     if (category) {
@@ -291,37 +260,10 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
     }
 
     if (ingredients) {
-      console.log('Raw Ingredients:, ', ingredients); ////
       await handleUpdateIngredients(ingredients, existingRecipe);
-      //   const formattedIngredients = ingredients.map((ing: any) => ({
-      //     // id: ing.id, //RecipeIngredient ID
-      //     quantity: ing.quantity,
-      //     unit: ing.unit,
-      //     ingredient: {
-      //       //   id: ing.ingredient?.id,
-      //       name: ing.ingredient?.name,
-      //     },
-      //   }));
-
-      //   console.log('Formatted Ingredients:', formattedIngredients); ////
-      //   await handleIngredients(ingredients, existingRecipe);
-      console.log('Ingredients updated successfully.');
     }
 
     if (instructions) {
-      //   const formattedInstructions = instructions.map((ins: any) => ({
-      //     id: ins.id,
-      //     stepNumber: ins.stepNumber,
-      //     instruction: {
-      //       id: ins.instruction?.id,
-      //       step: ins.instruction?.step,
-      //     },
-      //   }));
-      //   console.log(
-      //     'Formatted Instructions for handleInstructions:',
-      //     formattedInstructions,
-      //   );
-
       await handleUpdateInstructions(instructions, existingRecipe);
     }
 
@@ -336,7 +278,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
         'instructions.instruction',
       ],
     });
-    console.log(updatedRecipe); ////
 
     res.status(200).json({
       success: true,
@@ -344,18 +285,14 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
       data: updatedRecipe,
     });
   } catch (err: any) {
-    console.error('Error in updateRecipe:', err); // Debug log
     res.status(500).json({ success: false, message: err.message });
   }
 };
 //================================================================//
 //DeleteRecipe
 const deleteRecipe = async (req: Request, res: Response): Promise<void> => {
-  console.log('deleteRecipe Controller is Working...'); ////
-
   try {
     const { id } = req.params;
-    console.log('id:', id); ////
 
     //Grab the repo
     const recipeRepository = AppDataSource.getRepository(Recipe);
@@ -371,7 +308,6 @@ const deleteRecipe = async (req: Request, res: Response): Promise<void> => {
     }
 
     const recipeTitle = recipe.title;
-    console.log('Recipe to delete:', recipeTitle); ////
 
     //delete it
     await recipeRepository.remove(recipe);
@@ -381,7 +317,6 @@ const deleteRecipe = async (req: Request, res: Response): Promise<void> => {
       message: `Recipe ${recipeTitle} deleted successfully`,
     });
   } catch (err: any) {
-    console.error('Error in deleteRecipe:', err); // Debug log
     res.status(500).json({ success: false, message: err.message });
   }
 };
