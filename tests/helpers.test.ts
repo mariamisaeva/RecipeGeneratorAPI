@@ -409,23 +409,26 @@ describe('handleUpdateInstructions Function', () => {
     (AppDataSource.getRepository as jest.Mock)
       .mockImplementationOnce(() => mockInstructionsRepository)
       .mockImplementationOnce(() => mockRecipeInstructionRepository);
+
+    // Ensure `find` always returns an array
+    mockRecipeInstructionRepository.find.mockResolvedValue([]);
   });
 
   it('should update existing instructions and add new ones', async () => {
     const mockRecipe = {
       id: 1,
-      instructions: [{ id: 1, instruction: { step: 'Step 1' }, stepNumber: 1 }],
+      instructions: [{ id: 1, instruction: { step: 'Step 1' } }],
     } as any;
 
     const mockInstructions = [
-      { id: 1, instruction: { step: 'Step 1' }, stepNumber: 1 },
-      { instruction: { step: 'Step 2' }, stepNumber: 2 },
+      { id: 1, stepNumber: 1, instruction: { id: 1, step: 'Step 1' } },
+      { stepNumber: 2, instruction: { step: 'Step 2' } },
     ];
 
     const mockUpdatedInstruction = {
       id: 1,
-      instruction: { step: 'Step 1' },
       stepNumber: 1,
+      instruction: { id: 1, step: 'Step 1' },
     };
 
     const mockNewInstruction = { id: 2, step: 'Step 2' };
@@ -436,8 +439,8 @@ describe('handleUpdateInstructions Function', () => {
     };
 
     mockInstructionsRepository.findOneBy
-      .mockResolvedValueOnce({ id: 1, step: 'Step 1' })
-      .mockResolvedValueOnce(null);
+      .mockResolvedValueOnce({ id: 1, step: 'Step 1' }) // Mock existing instruction
+      .mockResolvedValueOnce(null); // Mock new instruction
 
     mockInstructionsRepository.create.mockReturnValue(mockNewInstruction);
     mockInstructionsRepository.save.mockResolvedValue(mockNewInstruction);
@@ -453,71 +456,64 @@ describe('handleUpdateInstructions Function', () => {
       .mockResolvedValueOnce(mockUpdatedInstruction)
       .mockResolvedValueOnce(mockNewRecipeInstruction);
 
-    // Mock `find` to return the updated instructions
-    mockRecipeInstructionRepository.find.mockResolvedValueOnce([
-      mockUpdatedInstruction,
-      mockNewRecipeInstruction,
-    ]);
-
     const result = await handleUpdateInstructions(mockInstructions, mockRecipe);
 
     expect(result).toEqual([mockUpdatedInstruction, mockNewRecipeInstruction]);
     expect(mockRecipeInstructionRepository.save).toHaveBeenCalledTimes(2);
     expect(mockRecipeInstructionRepository.find).toHaveBeenCalledWith({
       where: { recipe: { id: mockRecipe.id } },
+      relations: ['instruction'],
     });
+  });
+
+  it('should throw an error if instruction step or id is missing', async () => {
+    const mockRecipe = { id: 1, instructions: [] } as any;
+
+    const mockInstructions = [{ stepNumber: 1, instruction: { step: '' } }];
+
+    await expect(
+      handleUpdateInstructions(mockInstructions, mockRecipe),
+    ).rejects.toThrow('Instruction step or id is required');
   });
 
   it('should remove excluded instructions', async () => {
     const mockRecipe = {
       id: 1,
       instructions: [
-        { id: 1, instruction: { step: 'Step 1' }, stepNumber: 1 },
-        { id: 2, instruction: { step: 'Step 2' }, stepNumber: 2 },
+        { id: 1, instruction: { step: 'Step 1' } },
+        { id: 2, instruction: { step: 'Step 2' } },
       ],
     } as any;
 
     const mockInstructions = [
-      { id: 1, instruction: { step: 'Step 1' }, stepNumber: 1 },
+      { id: 1, stepNumber: 1, instruction: { id: 1, step: 'Step 1' } },
     ];
 
     const mockUpdatedInstruction = {
       id: 1,
-      instruction: { step: 'Step 1' },
       stepNumber: 1,
+      instruction: { id: 1, step: 'Step 1' },
     };
+
+    mockRecipeInstructionRepository.find.mockResolvedValueOnce([
+      { id: 1, stepNumber: 1, instruction: { step: 'Step 1' } },
+      { id: 2, stepNumber: 2, instruction: { step: 'Step 2' } },
+    ]);
 
     mockRecipeInstructionRepository.findOne.mockResolvedValueOnce(
       mockUpdatedInstruction,
     );
+
     mockRecipeInstructionRepository.save.mockResolvedValueOnce(
       mockUpdatedInstruction,
     );
-
-    // Mock `find` to return the updated instructions
-    mockRecipeInstructionRepository.find.mockResolvedValueOnce([
-      mockUpdatedInstruction,
-    ]);
-
     mockRecipeInstructionRepository.remove.mockResolvedValueOnce(undefined);
 
     const result = await handleUpdateInstructions(mockInstructions, mockRecipe);
 
     expect(result).toEqual([mockUpdatedInstruction]);
     expect(mockRecipeInstructionRepository.remove).toHaveBeenCalledWith([
-      { id: 2, instruction: { step: 'Step 2' }, stepNumber: 2 },
+      { id: 2, instruction: { step: 'Step 2' } },
     ]);
-  });
-
-  it('should throw an error if instruction step or id is missing', async () => {
-    const mockRecipe = { id: 1, instructions: [] } as any;
-
-    const mockInstructions = [
-      { instruction: { step: '' }, stepNumber: 1 }, // Missing step
-    ];
-
-    await expect(
-      handleUpdateInstructions(mockInstructions, mockRecipe),
-    ).rejects.toThrow('Instruction step or id is required');
   });
 });
