@@ -1,13 +1,22 @@
 import { Request, Response } from 'express';
-import { getAllRecipes } from '../src/controllers/recipeController';
+import {
+  getAllRecipes,
+  createRecipe,
+} from '../src/controllers/recipeController';
 import { AppDataSource } from '../src/config/database';
 import { Recipe } from '../src/entities/Recipe';
+import { handleIngredients, handleInstructions } from '../src/utils/helpers';
 import { ILike } from 'typeorm';
 
 jest.mock('../src/config/database', () => ({
   AppDataSource: {
     getRepository: jest.fn(),
   },
+}));
+
+jest.mock('../src/utils/helpers', () => ({
+  handleIngredients: jest.fn(),
+  handleInstructions: jest.fn(),
 }));
 
 describe('getAllRecipes Controller', () => {
