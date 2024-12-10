@@ -331,8 +331,6 @@ describe('handleUpdateIngredients Function', () => {
     const result = await handleUpdateIngredients(mockIngredients, mockRecipe);
 
     expect(result).toEqual([mockUpdatedIngredient, mockNewRecipeIngredient]);
-
-    // expect(mockIngredientsRepository.findOneBy).toHaveBeenCalledTimes(2);
     expect(mockRecipeIngredientRepository.save).toHaveBeenCalledTimes(2);
     expect(mockRecipeIngredientRepository.find).toHaveBeenCalledWith({
       where: { recipe: { id: mockRecipe.id } },
