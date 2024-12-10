@@ -4,6 +4,7 @@ import {
   createRecipe,
   getRecipeById,
   updateRecipe,
+  deleteRecipe,
 } from '../src/controllers/recipeController';
 import { AppDataSource } from '../src/config/database';
 import { Recipe } from '../src/entities/Recipe';
@@ -24,9 +25,6 @@ jest.mock('../src/config/database', () => ({
 jest.mock('../src/utils/helpers', () => ({
   handleIngredients: jest.fn(),
   handleInstructions: jest.fn(),
-}));
-
-jest.mock('../utils/helpers', () => ({
   handleUpdateIngredients: jest.fn(),
   handleUpdateInstructions: jest.fn(),
 }));
@@ -445,3 +443,6 @@ describe('updateRecipe Controller', () => {
     });
   });
 });
+
+//================================================================//
+//DeleteRecipe
