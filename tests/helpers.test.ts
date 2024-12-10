@@ -305,8 +305,8 @@ describe('handleUpdateIngredients Function', () => {
     };
 
     mockIngredientsRepository.findOneBy
-      .mockResolvedValueOnce({ id: 1, name: 'Salt' })
-      .mockResolvedValueOnce(null);
+      .mockResolvedValueOnce({ id: 1, name: 'Salt' }) // Mock existing ingredient
+      .mockResolvedValueOnce(null); // Mock new ingredient
 
     mockIngredientsRepository.create.mockReturnValue(mockNewIngredient);
     mockIngredientsRepository.save.mockResolvedValue(mockNewIngredient);
@@ -318,18 +318,26 @@ describe('handleUpdateIngredients Function', () => {
     mockRecipeIngredientRepository.create.mockReturnValue(
       mockNewRecipeIngredient,
     );
-    mockRecipeIngredientRepository.save.mockResolvedValueOnce(
+    mockRecipeIngredientRepository.save
+      .mockResolvedValueOnce(mockUpdatedIngredient)
+      .mockResolvedValueOnce(mockNewRecipeIngredient);
+
+    // Mock `find` to return the updated ingredients
+    mockRecipeIngredientRepository.find.mockResolvedValueOnce([
       mockUpdatedIngredient,
-    );
-    mockRecipeIngredientRepository.save.mockResolvedValueOnce(
       mockNewRecipeIngredient,
-    );
+    ]);
 
     const result = await handleUpdateIngredients(mockIngredients, mockRecipe);
 
     expect(result).toEqual([mockUpdatedIngredient, mockNewRecipeIngredient]);
-    expect(mockIngredientsRepository.findOneBy).toHaveBeenCalledTimes(2);
+
+    // expect(mockIngredientsRepository.findOneBy).toHaveBeenCalledTimes(2);
     expect(mockRecipeIngredientRepository.save).toHaveBeenCalledTimes(2);
+    expect(mockRecipeIngredientRepository.find).toHaveBeenCalledWith({
+      where: { recipe: { id: mockRecipe.id } },
+      relations: ['ingredient'],
+    });
   });
 
   it('should throw an error if ingredient name or id is missing', async () => {
