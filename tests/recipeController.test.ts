@@ -446,3 +446,76 @@ describe('updateRecipe Controller', () => {
 
 //================================================================//
 //DeleteRecipe
+describe('deleteRecipe Controller', () => {
+  let mockRequest: Partial<Request>;
+  let mockResponse: Partial<Response>;
+  let mockRecipeRepository: any;
+
+  beforeEach(() => {
+    mockRequest = {};
+    mockResponse = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    mockRecipeRepository = {
+      findOne: jest.fn(),
+      remove: jest.fn(),
+    };
+    (AppDataSource.getRepository as jest.Mock).mockReturnValue(
+      mockRecipeRepository,
+    );
+  });
+
+  it('should successfully delete a recipe', async () => {
+    mockRequest.params = { id: '1' };
+
+    const mockRecipe = { id: 1, title: 'Pasta' };
+
+    mockRecipeRepository.findOne.mockResolvedValue(mockRecipe);
+    mockRecipeRepository.remove.mockResolvedValue(undefined);
+
+    await deleteRecipe(mockRequest as Request, mockResponse as Response);
+
+    expect(mockRecipeRepository.findOne).toHaveBeenCalledWith({
+      where: { id: 1 },
+    });
+    expect(mockRecipeRepository.remove).toHaveBeenCalledWith(mockRecipe);
+    expect(mockResponse.status).toHaveBeenCalledWith(200);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: true,
+      message: `Recipe ${mockRecipe.title} deleted successfully`,
+    });
+  });
+
+  it('should return 404 if the recipe is not found', async () => {
+    mockRequest.params = { id: '2' };
+
+    mockRecipeRepository.findOne.mockResolvedValue(null);
+
+    await deleteRecipe(mockRequest as Request, mockResponse as Response);
+
+    expect(mockRecipeRepository.findOne).toHaveBeenCalledWith({
+      where: { id: 2 },
+    });
+    expect(mockRecipeRepository.remove).not.toHaveBeenCalled();
+    expect(mockResponse.status).toHaveBeenCalledWith(404);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'Recipe not found',
+    });
+  });
+
+  it('should return 500 for server error', async () => {
+    mockRequest.params = { id: '3' };
+
+    mockRecipeRepository.findOne.mockRejectedValue(new Error('Database error'));
+
+    await deleteRecipe(mockRequest as Request, mockResponse as Response);
+
+    expect(mockResponse.status).toHaveBeenCalledWith(500);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'Database error',
+    });
+  });
+});
