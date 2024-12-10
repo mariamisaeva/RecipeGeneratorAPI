@@ -4,14 +4,6 @@ import { AppDataSource } from '../src/config/database';
 import { Recipe } from '../src/entities/Recipe';
 import { ILike } from 'typeorm';
 
-// jest.mock('typeorm', () => {
-//   const actual = jest.requireActual('typeorm');
-//   return {
-//     ...actual,
-//     getRepository: jest.fn(),
-//   };
-// });
-
 jest.mock('../src/config/database', () => ({
   AppDataSource: {
     getRepository: jest.fn(),
