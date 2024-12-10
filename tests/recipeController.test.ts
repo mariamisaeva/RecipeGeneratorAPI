@@ -106,3 +106,108 @@ describe('getAllRecipes Controller', () => {
     });
   });
 });
+
+//================================================================//
+//CreateRecipe
+describe('createRecipe Controller', () => {
+  let mockRequest: Partial<Request>;
+  let mockResponse: Partial<Response>;
+  let mockRecipeRepository: any;
+
+  beforeEach(() => {
+    mockRequest = {};
+    mockResponse = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    mockRecipeRepository = {
+      create: jest.fn(),
+      save: jest.fn(),
+      findOne: jest.fn(),
+    };
+    (AppDataSource.getRepository as jest.Mock).mockReturnValue(
+      mockRecipeRepository,
+    );
+  });
+
+  it('should successfully create a recipe', async () => {
+    mockRequest.body = {
+      title: 'Chocolate Cake',
+      description: 'Delicious cake',
+      isVegetarian: true,
+      servings: 8,
+      time: '60',
+      image: 'image_url',
+      category: 'dessert',
+      ingredients: [
+        { ingredient: { name: 'Flour' }, quantity: 2, unit: 'cups' },
+      ],
+      instructions: [
+        { instruction: { step: 'Mix ingredients' }, stepNumber: 1 },
+      ],
+    };
+
+    const mockRecipe = { id: 1, title: 'Chocolate Cake' };
+    const fullMockRecipe = { ...mockRecipe, ingredients: [], instructions: [] };
+
+    mockRecipeRepository.create.mockReturnValue(mockRecipe);
+    mockRecipeRepository.save.mockResolvedValue(mockRecipe);
+    mockRecipeRepository.findOne.mockResolvedValue(fullMockRecipe);
+
+    (handleIngredients as jest.Mock).mockResolvedValue([]);
+    (handleInstructions as jest.Mock).mockResolvedValue([]);
+
+    await createRecipe(mockRequest as Request, mockResponse as Response);
+
+    expect(mockRecipeRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Chocolate Cake',
+        category: 'dessert',
+      }),
+    );
+    expect(handleIngredients).toHaveBeenCalled();
+    expect(handleInstructions).toHaveBeenCalled();
+    expect(mockResponse.status).toHaveBeenCalledWith(201);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: true,
+      message: 'Recipe created successfully',
+      data: fullMockRecipe,
+    });
+  });
+
+  it('should return 400 for invalid category', async () => {
+    mockRequest.body = {
+      title: 'Chocolate Cake',
+      category: 'invalid_category',
+    };
+
+    await createRecipe(mockRequest as Request, mockResponse as Response);
+
+    expect(mockResponse.status).toHaveBeenCalledWith(400);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: false,
+      message: expect.stringContaining('Invalid category'),
+    });
+  });
+
+  it('should return 500 for server error', async () => {
+    mockRequest.body = {
+      title: 'Chocolate Cake',
+      category: 'dessert',
+      ingredients: [],
+      instructions: [],
+    };
+
+    mockRecipeRepository.create.mockImplementation(() => {
+      throw new Error('Database error');
+    });
+
+    await createRecipe(mockRequest as Request, mockResponse as Response);
+
+    expect(mockResponse.status).toHaveBeenCalledWith(500);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'Database error',
+    });
+  });
+});
