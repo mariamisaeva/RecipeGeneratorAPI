@@ -39,8 +39,6 @@ export const registerUser = async (
     //Validate the user
     const validationErrors = await validate(newUser);
     if (validationErrors.length > 0) {
-      //   res.status(400).json({ success: false, message: validationErrors });
-      //   return;
       const formattedErrors = validationErrors.map((error) => {
         return {
           field: error.property,
