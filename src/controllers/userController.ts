@@ -28,7 +28,7 @@ export const registerUser = async (
       return;
     }
 
-    //Create a new user and hash the password
+    //Create a new user, validation, and hash the password
 
     const newUser = userRepository.create({
       username,
