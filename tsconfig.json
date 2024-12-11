@@ -9,7 +9,8 @@
     "experimentalDecorators": true,
 
     "emitDecoratorMetadata": true,
-    "forceConsistentCasingInFileNames": true // This is for case sensitive file system
+    "forceConsistentCasingInFileNames": true, // This is for case sensitive file system
+    "typeRoots": ["./node_modules/@types", "./types"]
   },
   "include": ["src"],
   "exclude": ["node_modules"]
