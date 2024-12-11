@@ -3,6 +3,7 @@ import { dbConnection } from './config/database';
 import dotenv from 'dotenv';
 dotenv.config();
 import recipeRoutes from './routes/recipeRoutes';
+import userRoutes from './routes/userRoutes';
 // import cors from 'cors';
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json());
 
 //api routes
 app.use('/api/recipes', recipeRoutes);
+app.use('/api/user', userRoutes);
 
 dbConnection
   .then(() => {

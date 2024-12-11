@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { RecipeInstruction } from './RecipeInstruction';
 import { RecipeIngredient } from './RecipeIngredient';
-// import { User } from './User';
+import { User } from './User';
 // import { FavoriteRecipe } from './FavoriteRecipe';
 
 export enum CategoryEnum {
@@ -73,8 +73,8 @@ export class Recipe {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  //   @ManyToOne(() => User, (u) => u.recipes, { onDelete: 'CASCADE' })
-  //   author!: User; //User who created the recipe
+  @ManyToOne(() => User, (u) => u.recipes, { onDelete: 'CASCADE' })
+  author!: User; //User who created the recipe
 
   @Column({ default: 0 })
   favCounter!: number;

@@ -46,3 +46,12 @@ export interface GetAllRecipesResponse {
   data: Recipe_TS[];
   pagination: PaginationMetadata;
 }
+
+export interface User_TS {
+  id?: number;
+  username: string;
+  email: string;
+  password: string;
+  recipes: Recipe_TS[];
+  createdAt: Date;
+}
