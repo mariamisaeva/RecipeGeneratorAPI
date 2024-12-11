@@ -11,8 +11,6 @@ export const registerUser = async (
   const { username, email, password } = req.body;
 
   console.log(username);
-  console.log(email);
-  console.log(password);
 
   try {
     if (!username || !email || !password) {
