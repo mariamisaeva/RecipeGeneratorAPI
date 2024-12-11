@@ -6,7 +6,7 @@ import { Instruction } from '../entities/Instruction';
 import { Ingredient } from '../entities/Ingredient';
 import { RecipeIngredient } from '../entities/RecipeIngredient';
 import { RecipeInstruction } from '../entities/RecipeInstruction';
-// import { User } from '../entities/User';
+import { User } from '../entities/User';
 // import { FavoriteRecipe } from '../entities/FavoriteRecipe';
 
 const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
@@ -24,10 +24,10 @@ export const AppDataSource = new DataSource({
     Ingredient,
     RecipeInstruction,
     RecipeIngredient,
-    // User,
+    User,
     // FavoriteRecipe,
   ], //schemas
-  synchronize: true, // this will auto create tables based on the entities
+  synchronize: false, // this will auto create tables based on the entities
   // set to FALSE in production to avoid data loss
   logging: false, // set to TRUE to see the SQL queries in the console
   migrations: [],
