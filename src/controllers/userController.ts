@@ -33,21 +33,39 @@ export const registerUser = async (
     }
 
     //Create a new user and hash the password
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    // const saltRounds = 10;
+    // const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const newUser = userRepository.create({
       username,
       email,
-      password: hashedPassword,
+      password,
     });
 
     //Validate the user
     const validationErrors = await validate(newUser);
     if (validationErrors.length > 0) {
-      res.status(400).json({ success: false, message: validationErrors });
+      //   res.status(400).json({ success: false, message: validationErrors });
+      //   return;
+      const formattedErrors = validationErrors.map((error) => {
+        return {
+          field: error.property,
+          message: error.constraints
+            ? Object.values(error.constraints)
+            : 'Validation error',
+        };
+      });
+
+      res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: formattedErrors,
+      });
       return;
     }
+
+    const saltRounds = 10;
+    newUser.password = await bcrypt.hash(password, saltRounds);
 
     //Save the user
     await userRepository.save(newUser);
@@ -55,7 +73,11 @@ export const registerUser = async (
     res.status(201).json({
       success: true,
       message: 'User created successfully',
-      data: newUser,
+      data: {
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+      },
     });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
