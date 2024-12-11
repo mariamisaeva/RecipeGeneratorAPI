@@ -29,9 +29,6 @@ export class User {
   @CreateDateColumn()
   createdAt!: Date;
 
-  @UpdateDateColumn()
-  updatedAt!: Date;
-
   //   @OneToMany(() => FavoriteRecipe, (fr) => fr.user)
   //   favoriteRecipes!: FavoriteRecipe[];
 }
