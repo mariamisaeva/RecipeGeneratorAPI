@@ -10,8 +10,6 @@ export const registerUser = async (
 ): Promise<void> => {
   const { username, email, password } = req.body;
 
-  console.log(username);
-
   try {
     if (!username || !email || !password) {
       res
