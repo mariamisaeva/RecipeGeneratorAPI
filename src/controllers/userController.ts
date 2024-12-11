@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import { validate } from 'class-validator';
 import { User } from '../entities/User';
 
-export const createUser = async (
+export const registerUser = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
@@ -29,6 +29,7 @@ export const createUser = async (
     });
     if (existingUser) {
       res.status(409).json({ success: false, message: 'User already exists' });
+      return;
     }
 
     //Create a new user and hash the password
@@ -51,13 +52,11 @@ export const createUser = async (
     //Save the user
     await userRepository.save(newUser);
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: 'User created successfully',
-        data: newUser,
-      });
+    res.status(201).json({
+      success: true,
+      message: 'User created successfully',
+      data: newUser,
+    });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
   }
