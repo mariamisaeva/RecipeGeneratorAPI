@@ -13,7 +13,7 @@ app.use(express.json());
 
 //api routes
 app.use('/api/recipes', recipeRoutes);
-app.use('/api/user', userRoutes);
+app.use('/api/users', userRoutes);
 
 dbConnection
   .then(() => {
