@@ -29,8 +29,6 @@ export const registerUser = async (
     }
 
     //Create a new user and hash the password
-    // const saltRounds = 10;
-    // const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const newUser = userRepository.create({
       username,
