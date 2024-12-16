@@ -7,12 +7,10 @@ export const authenticateUser = (
   res: Response,
   next: NextFunction,
 ) => {
-  //   console.log('Authenticating user...');
   const authHeader = req.headers.authorization;
-  //   console.log('authHeader:', authHeader);
 
   const token = authHeader && authHeader.split(' ')[1];
-  //   console.log('token:', token);
+
   if (!token) {
     res
       .status(401)
@@ -25,7 +23,6 @@ export const authenticateUser = (
     process.env.JWT_SECRET as string,
     (err, decodedToken: JwtPayload) => {
       if (err) {
-        //   console.log('JWT verification error:', err);
         res
           .status(403)
           .json({ success: false, message: 'Token is invalid or expired.' }); //forbidden
@@ -33,10 +30,9 @@ export const authenticateUser = (
       }
 
       const { iat, exp, ...userRestDetails } = decodedToken;
-      // req.user = decodedToken as JwtPayload;
-      //   req.user = decodedToken as JwtPayload;
+
       req.user = userRestDetails;
-      // console.log('req.user:', req.user);
+
       next();
     },
   );
