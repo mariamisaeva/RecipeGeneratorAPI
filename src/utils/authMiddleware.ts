@@ -32,9 +32,10 @@ export const authenticateUser = (
         return;
       }
 
+      const { iat, exp, ...userRestDetails } = decodedToken;
       // req.user = decodedToken as JwtPayload;
-      req.user = decodedToken as JwtPayload;
-      console.log('req.user:', req.user.email);
+      //   req.user = decodedToken as JwtPayload;
+      req.user = userRestDetails;
       // console.log('req.user:', req.user);
       next();
     },
