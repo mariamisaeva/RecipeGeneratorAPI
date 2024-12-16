@@ -32,9 +32,6 @@ export const authenticateUser = (
         return;
       }
 
-      console.log('Decoded token:', decodedToken);
-      console.log('Decoded token:', decodedToken.email);
-      console.log('Decoded token:', (decodedToken as JwtPayload).username);
       // req.user = decodedToken as JwtPayload;
       req.user = decodedToken as JwtPayload;
       console.log('req.user:', req.user.email);
