@@ -110,7 +110,11 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
 
     //generate JWT token
     const token = jwt.sign(
-      { userId: user.id },
+      {
+        userId: user.id,
+        username: user.username,
+        email: user.email,
+      },
       process.env.JWT_SECRET as string,
       { expiresIn: '1d' },
     );
@@ -140,7 +144,13 @@ export const getCurrentUser = async (
 
   console.log('user:', user);
   try {
-    res.status(200).json({ 'User profile': user });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: 'User profile retrieved successfully',
+        data: user,
+      });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
   }

@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-// import type { JwtPayload } from '../types/express';
 import type { JwtPayload } from '../types/express';
 
 export const authenticateUser = (
@@ -21,17 +20,26 @@ export const authenticateUser = (
     return;
   }
 
-  jwt.verify(token, process.env.JWT_SECRET as string, (err, decodedToken) => {
-    if (err) {
-      //   console.log('JWT verification error:', err);
-      res
-        .status(403)
-        .json({ success: false, message: 'Token is invalid or expired.' }); //forbidden
-      return;
-    }
-    // console.log('Decoded token:', decodedToken);
-    req.user = decodedToken as JwtPayload;
-    // console.log('req.user:', req.user);
-    next();
-  });
+  jwt.verify(
+    token,
+    process.env.JWT_SECRET as string,
+    (err, decodedToken: JwtPayload) => {
+      if (err) {
+        //   console.log('JWT verification error:', err);
+        res
+          .status(403)
+          .json({ success: false, message: 'Token is invalid or expired.' }); //forbidden
+        return;
+      }
+
+      console.log('Decoded token:', decodedToken);
+      console.log('Decoded token:', decodedToken.email);
+      console.log('Decoded token:', (decodedToken as JwtPayload).username);
+      // req.user = decodedToken as JwtPayload;
+      req.user = decodedToken as JwtPayload;
+      console.log('req.user:', req.user.email);
+      // console.log('req.user:', req.user);
+      next();
+    },
+  );
 };
