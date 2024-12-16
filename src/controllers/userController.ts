@@ -129,3 +129,5 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+//Get current user
