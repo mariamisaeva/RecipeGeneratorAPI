@@ -131,3 +131,17 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
 };
 
 //Get current user
+export const getCurrentUser = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  console.log('req:', req);
+  //   const user = req.user;
+
+  //   console.log('user:', user);
+  try {
+    res.status(200).json('User profile');
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
