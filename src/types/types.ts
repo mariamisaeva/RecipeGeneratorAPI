@@ -1,4 +1,5 @@
 export interface Recipe_TS {
+  id?: number;
   title: string;
   description?: string;
   isVegetarian: boolean;
@@ -6,6 +7,12 @@ export interface Recipe_TS {
   time: string;
   image?: string;
   category?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  author: {
+    userId: string;
+    username: string;
+  };
   ingredients: Ingredient_TS[];
   instructions: Instruction_TS[];
 }

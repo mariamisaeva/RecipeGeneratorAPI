@@ -57,6 +57,7 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
         },
       ],
       relations: [
+        'author',
         'ingredients',
         'ingredients.ingredient',
         'instructions',
@@ -76,6 +77,26 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    //formatted response
+    const formattedRecipes = fetchAllRecipes.map((rec) => ({
+      id: rec.id,
+      title: rec.title,
+      description: rec.description,
+      isVegetarian: rec.isVegetarian,
+      servings: rec.servings,
+      time: rec.time,
+      image: rec.image,
+      category: rec.category,
+      ingredients: rec.ingredients,
+      instructions: rec.instructions,
+      author: {
+        userId: rec.author.id,
+        username: rec.author.username,
+      },
+      createdAt: rec.createdAt,
+      updatedAt: rec.updatedAt,
+    }));
+
     const pagination: PaginationMetadata = {
       total,
       currentPage: pageNumber,
@@ -86,7 +107,7 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
     const response: GetAllRecipesResponse = {
       success: true,
       message: 'Getting all recipes...',
-      data: fetchAllRecipes,
+      data: formattedRecipes,
       pagination,
     };
 
