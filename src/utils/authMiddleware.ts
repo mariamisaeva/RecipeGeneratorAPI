@@ -1,14 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import type { JwtPayload } from '../types/express';
 
 export const authenticateUser = (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  console.log('Authenticating user...');
   const authHeader = req.headers.authorization;
-  console.log('authHeader:', authHeader);
 
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -19,15 +18,22 @@ export const authenticateUser = (
     return;
   }
 
-  jwt.verify(token, process.env.JWT_SECRET as string, (err, user) => {
-    if (err) {
-      res
-        .status(403)
-        .json({ success: false, message: 'Token is invalid or expired.' }); //forbidden
-      return;
-    }
+  jwt.verify(
+    token,
+    process.env.JWT_SECRET as string,
+    (err, decodedToken: JwtPayload) => {
+      if (err) {
+        res
+          .status(403)
+          .json({ success: false, message: 'Token is invalid or expired.' }); //forbidden
+        return;
+      }
 
-    req.user = user;
-    next();
-  });
+      const { iat, exp, ...userRestDetails } = decodedToken;
+
+      req.user = userRestDetails;
+
+      next();
+    },
+  );
 };
