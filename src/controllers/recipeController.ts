@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { AppDataSource } from '../config/database';
 import { Recipe } from '../entities/Recipe';
+import { User } from '../entities/User';
 import {
   Recipe_TS,
   RecipeQueryParams,
@@ -56,6 +57,7 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
         },
       ],
       relations: [
+        'author',
         'ingredients',
         'ingredients.ingredient',
         'instructions',
@@ -75,6 +77,26 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    //formatted response
+    const formattedRecipes = fetchAllRecipes.map((rec) => ({
+      id: rec.id,
+      title: rec.title,
+      description: rec.description,
+      isVegetarian: rec.isVegetarian,
+      servings: rec.servings,
+      time: rec.time,
+      image: rec.image,
+      category: rec.category,
+      ingredients: rec.ingredients,
+      instructions: rec.instructions,
+      author: {
+        userId: rec.author.id,
+        username: rec.author.username,
+      },
+      createdAt: rec.createdAt,
+      updatedAt: rec.updatedAt,
+    }));
+
     const pagination: PaginationMetadata = {
       total,
       currentPage: pageNumber,
@@ -85,7 +107,7 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
     const response: GetAllRecipesResponse = {
       success: true,
       message: 'Getting all recipes...',
-      data: fetchAllRecipes,
+      data: formattedRecipes,
       pagination,
     };
 
@@ -102,6 +124,11 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
 //CreateRecipe
 const createRecipe = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.user || !req.user.userId) {
+      res.status(401).json({ success: false, message: 'Unauthorized access' });
+      return;
+    }
+
     const {
       title,
       description,
@@ -123,6 +150,17 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
       });
     }
     const recipeRepository = AppDataSource.getRepository(Recipe);
+    const userRepository = AppDataSource.getRepository(User);
+
+    //fetch the user req.user.id
+    const loggedInUser = await userRepository.findOne({
+      where: { id: req.user.userId },
+    });
+
+    if (!loggedInUser) {
+      res.status(404).json({ success: false, message: 'User not found' });
+      return;
+    }
 
     const newRecipe = recipeRepository.create({
       title,
@@ -132,6 +170,7 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
       time,
       image,
       category: category as CategoryEnum,
+      author: loggedInUser,
     });
 
     await recipeRepository.save(newRecipe);
@@ -146,13 +185,22 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
         'ingredients.ingredient',
         'instructions',
         'instructions.instruction',
+        'author',
       ],
     });
+
+    const filteredRecipe = {
+      ...fullNewRecipe,
+      author: {
+        id: fullNewRecipe?.author.id,
+        username: fullNewRecipe?.author.username,
+      },
+    };
 
     res.status(201).json({
       success: true,
       message: 'Recipe created successfully',
-      data: fullNewRecipe,
+      data: filteredRecipe,
     });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
