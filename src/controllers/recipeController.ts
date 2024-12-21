@@ -257,12 +257,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
     const recipeRepository = AppDataSource.getRepository(Recipe);
     const userId = req.user.userId;
 
-    // //fetch the recipe by id and author relation to check if the user is the author
-    // const existingRecipe = await recipeRepository.findOne({
-    //   where: { id: Number(id) },
-    //   relations: ['author'],
-    // });
-
     const {
       title,
       description,
