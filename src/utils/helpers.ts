@@ -59,7 +59,6 @@ export const handleIngredients = async (
     indexNumber++;
   }
 
-  //   console.log('New Ingredients:', newIngredients); ////
   return newIngredients;
 };
 
