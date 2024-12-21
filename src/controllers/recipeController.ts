@@ -16,6 +16,7 @@ import {
 } from '../utils/helpers';
 import { CategoryEnum } from '../entities/Recipe';
 import { ILike } from 'typeorm';
+import { filterUserInfo } from '../utils/filterUserInfo';
 
 //GetAllRecipes
 const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
@@ -191,10 +192,7 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
 
     const filteredRecipe = {
       ...fullNewRecipe,
-      author: {
-        id: fullNewRecipe?.author.id,
-        username: fullNewRecipe?.author.username,
-      },
+      author: filterUserInfo(fullNewRecipe!.author),
     };
 
     res.status(201).json({
@@ -243,11 +241,17 @@ const getRecipeById = async (req: Request, res: Response) => {
 //================================================================//
 //UpdateRecipe //EditRecipe
 const updateRecipe = async (req: Request, res: Response): Promise<void> => {
-  console.log('updateRecipe Controller is Working...'); ////
-
   try {
-    const recipeRepository = AppDataSource.getRepository(Recipe);
     const { id } = req.params;
+
+    //check if user is logged in
+    if (!req.user || !req.user.userId) {
+      res.status(401).json({ success: false, message: 'Unauthorized access' });
+      return;
+    }
+
+    const recipeRepository = AppDataSource.getRepository(Recipe);
+    const userId = req.user.userId;
 
     const {
       title,
@@ -264,6 +268,7 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
     const existingRecipe = await recipeRepository.findOne({
       where: { id: Number(id) },
       relations: [
+        'author',
         'ingredients',
         'ingredients.ingredient',
         'instructions',
@@ -273,6 +278,14 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
 
     if (!existingRecipe) {
       res.status(404).json({ success: false, message: 'Recipe not found' });
+      return;
+    }
+
+    if (existingRecipe.author.id !== userId) {
+      res.status(403).json({
+        success: false,
+        message: 'You are not authorized to update this recipe',
+      });
       return;
     }
 
@@ -307,6 +320,7 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
       existingRecipe.category = category as CategoryEnum;
     }
 
+    //handle ingredients and instructions
     if (ingredients) {
       await handleUpdateIngredients(ingredients, existingRecipe);
     }
@@ -324,13 +338,19 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
         'ingredients.ingredient',
         'instructions',
         'instructions.instruction',
+        'author',
       ],
     });
+
+    const response = {
+      ...updatedRecipe,
+      author: filterUserInfo(updatedRecipe!.author),
+    };
 
     res.status(200).json({
       success: true,
       message: 'Recipe updated successfully',
-      data: updatedRecipe,
+      data: response,
     });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
@@ -342,16 +362,32 @@ const deleteRecipe = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
+    if (!req.user || !req.user.userId) {
+      res.status(401).json({ success: false, message: 'Unauthorized access' });
+      return;
+    }
+
     //Grab the repo
     const recipeRepository = AppDataSource.getRepository(Recipe);
+    const userId = req.user.userId;
 
     //find the recipe where id = id
     const recipe = await recipeRepository.findOne({
       where: { id: Number(id) },
+      relations: ['author'], //to check for ownership
     });
+
     //handle if not found
     if (!recipe) {
       res.status(404).json({ success: false, message: 'Recipe not found' });
+      return;
+    }
+
+    if (recipe.author.id !== userId) {
+      res.status(403).json({
+        success: false,
+        message: 'You are not authorized to delete this recipe',
+      });
       return;
     }
 

@@ -14,7 +14,7 @@ RecipeRouter.get('/', getAllRecipes); //  /api/recipes
 RecipeRouter.post('/create-recipe', authenticateUser, createRecipe); //  /api/recipes/create-recipe
 
 RecipeRouter.get('/:id', getRecipeById); //  /api/recipes/:id
-RecipeRouter.put('/edit/:id', updateRecipe); //  /api/recipes/:id
-RecipeRouter.delete('/:id', deleteRecipe); //  /api/recipes/:id
+RecipeRouter.put('/edit/:id', authenticateUser, updateRecipe); //  /api/recipes/:id
+RecipeRouter.delete('/:id', authenticateUser, deleteRecipe); //  /api/recipes/:id
 
 export default RecipeRouter;

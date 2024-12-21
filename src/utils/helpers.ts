@@ -59,12 +59,11 @@ export const handleIngredients = async (
     indexNumber++;
   }
 
-  //   console.log('New Ingredients:', newIngredients); ////
   return newIngredients;
 };
 
 //Instruction - RecipeInstruction
-//TODO
+
 //pass in instructions //grab repos //create an empty array type RecipeInstruction[] // define a stepNumber starts from 1  //loop through instructions // findOneBy //not exists: create and save it //create new recipe object in the jointRepo with destructured data //save it to jointRepo //push to array + increment num //return
 
 export const handleInstructions = async (
@@ -106,8 +105,6 @@ export const handleInstructions = async (
     newInstructions.push(RIns);
     stepNumber++;
   }
-
-  console.log('New Instructions:', newInstructions); ////
 
   return newInstructions;
 };
@@ -202,7 +199,7 @@ export const handleUpdateIngredients = async (
     const deletedIngredients = recipe.ingredients.filter(
       (ri) => !updatedIngredients.some((uRIng) => uRIng.id === ri.id),
     );
-    // console.log('Deleting RecipeIngredients:', deletedIngredients); ////
+
     await recipeIngredientRepository.remove(deletedIngredients);
   }
 
@@ -320,9 +317,6 @@ export const handleUpdateInstructions = async (
     where: { recipe: { id: recipe.id } },
     relations: ['instruction'],
   });
-  console.log('recipe.instructions: ', recipe.instructions); ////
-
-  console.log('New Instructions:', newInstructions); ////
 
   return newInstructions;
 };
