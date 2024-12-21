@@ -363,7 +363,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
 //================================================================//
 //DeleteRecipe
 const deleteRecipe = async (req: Request, res: Response): Promise<void> => {
-  console.log('deleteRecipe Controller is Working...'); ////
   try {
     const { id } = req.params;
 
