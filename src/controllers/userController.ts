@@ -154,10 +154,6 @@ const getUserRecipes = async (req: Request, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
 
-    console.log('userId:', userId);
-    console.log('req.user:', req.user);
-    console.log('req.user.id:', req.user.id);
-
     if (!req.user || req.user.userId !== userId) {
       res.status(403).json({ success: false, message: 'Unauthorized access' });
       return;
@@ -176,8 +172,6 @@ const getUserRecipes = async (req: Request, res: Response): Promise<void> => {
       ],
       order: { createdAt: 'DESC' },
     });
-
-    console.log('userRecipes:', userRecipes);
 
     if (userRecipes.length === 0) {
       res
