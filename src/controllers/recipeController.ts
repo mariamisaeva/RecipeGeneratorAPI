@@ -348,10 +348,18 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
 
     console.log('Updated Recipe:', updatedRecipe); // Log the final updated recipe ////
 
+    const response = {
+      ...updatedRecipe,
+      author: {
+        userId: updatedRecipe?.author.id,
+        username: updatedRecipe?.author.username,
+      },
+    };
+
     res.status(200).json({
       success: true,
       message: 'Recipe updated successfully',
-      data: updatedRecipe,
+      data: response,
     });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });

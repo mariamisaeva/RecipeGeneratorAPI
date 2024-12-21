@@ -29,7 +29,7 @@ export const authenticateUser = (
         return;
       }
 
-      const { iat, exp, ...userRestDetails } = decodedToken;
+      const { iat, exp, password, email, ...userRestDetails } = decodedToken;
 
       req.user = userRestDetails;
 
