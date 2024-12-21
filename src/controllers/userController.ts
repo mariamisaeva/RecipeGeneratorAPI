@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { validate } from 'class-validator';
 import { User } from '../entities/User';
+import { filterUserInfo } from '../utils/filterUserInfo';
 
 export const registerUser = async (
   req: Request,
