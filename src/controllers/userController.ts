@@ -5,11 +5,9 @@ import jwt from 'jsonwebtoken';
 import { validate } from 'class-validator';
 import { User } from '../entities/User';
 import { filterUserInfo } from '../utils/filterUserInfo';
+import { Recipe } from '../entities/Recipe';
 
-export const registerUser = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+const registerUser = async (req: Request, res: Response): Promise<void> => {
   const { username, email, password } = req.body;
 
   try {
@@ -78,7 +76,7 @@ export const registerUser = async (
 };
 
 //Login user
-export const loginUser = async (req: Request, res: Response): Promise<void> => {
+const loginUser = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
 
   try {
@@ -136,10 +134,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
 };
 
 //Get current user
-export const getCurrentUser = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+const getCurrentUser = async (req: Request, res: Response): Promise<void> => {
   const safeUser = filterUserInfo(req.user);
 
   try {
@@ -152,3 +147,69 @@ export const getCurrentUser = async (
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+//Get user recipes
+const getUserRecipes = async (req: Request, res: Response): Promise<void> => {
+  //preview the user recipes
+  try {
+    const { userId } = req.params;
+
+    console.log('userId:', userId);
+    console.log('req.user:', req.user);
+    console.log('req.user.id:', req.user.id);
+
+    if (!req.user || req.user.userId !== userId) {
+      res.status(403).json({ success: false, message: 'Unauthorized access' });
+      return;
+    }
+
+    const recipeRepository = AppDataSource.getRepository(Recipe);
+
+    const userRecipes = await recipeRepository.find({
+      where: { author: { id: userId } },
+      relations: [
+        'author',
+        'ingredients',
+        'ingredients.ingredient',
+        'instructions',
+        'instructions.instruction',
+      ],
+      order: { createdAt: 'DESC' },
+    });
+
+    console.log('userRecipes:', userRecipes);
+
+    if (userRecipes.length === 0) {
+      res
+        .status(404)
+        .json({ success: false, message: 'No recipes found for this user' });
+    }
+
+    // Format response
+    const formattedRecipes = userRecipes.map((recipe) => ({
+      id: recipe.id,
+      title: recipe.title,
+      description: recipe.description,
+      isVegetarian: recipe.isVegetarian,
+      servings: recipe.servings,
+      time: recipe.time,
+      image: recipe.image,
+      category: recipe.category,
+      createdAt: recipe.createdAt,
+      updatedAt: recipe.updatedAt,
+      author: filterUserInfo(recipe.author),
+      ingredients: recipe.ingredients,
+      instructions: recipe.instructions,
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: 'User recipes retrieved successfully',
+      data: formattedRecipes,
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export { registerUser, loginUser, getCurrentUser, getUserRecipes };
