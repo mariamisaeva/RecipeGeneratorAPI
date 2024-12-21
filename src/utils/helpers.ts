@@ -106,8 +106,6 @@ export const handleInstructions = async (
     stepNumber++;
   }
 
-  //   console.log('New Instructions:', newInstructions); ////
-
   return newInstructions;
 };
 
