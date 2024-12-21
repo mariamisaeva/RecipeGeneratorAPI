@@ -199,7 +199,7 @@ export const handleUpdateIngredients = async (
     const deletedIngredients = recipe.ingredients.filter(
       (ri) => !updatedIngredients.some((uRIng) => uRIng.id === ri.id),
     );
-    // console.log('Deleting RecipeIngredients:', deletedIngredients); ////
+
     await recipeIngredientRepository.remove(deletedIngredients);
   }
 
