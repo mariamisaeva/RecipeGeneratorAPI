@@ -63,7 +63,7 @@ export const handleIngredients = async (
 };
 
 //Instruction - RecipeInstruction
-//TODO
+
 //pass in instructions //grab repos //create an empty array type RecipeInstruction[] // define a stepNumber starts from 1  //loop through instructions // findOneBy //not exists: create and save it //create new recipe object in the jointRepo with destructured data //save it to jointRepo //push to array + increment num //return
 
 export const handleInstructions = async (
