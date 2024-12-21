@@ -140,7 +140,7 @@ export const getCurrentUser = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  const user = req.user;
+  const user = filterUserInfo(req.user);
 
   try {
     res.status(200).json({
