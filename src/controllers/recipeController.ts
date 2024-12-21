@@ -246,8 +246,25 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
   console.log('updateRecipe Controller is Working...'); ////
 
   try {
-    const recipeRepository = AppDataSource.getRepository(Recipe);
     const { id } = req.params;
+
+    //check if user is logged in
+    if (!req.user || !req.user.userId) {
+      res.status(401).json({ success: false, message: 'Unauthorized access' });
+      return;
+    }
+
+    const recipeRepository = AppDataSource.getRepository(Recipe);
+    const userId = req.user.userId;
+
+    console.log('Recipe ID:', id); // Log the recipe ID ////
+    console.log('userId:', userId); // Log the user ID ////
+
+    // //fetch the recipe by id and author relation to check if the user is the author
+    // const existingRecipe = await recipeRepository.findOne({
+    //   where: { id: Number(id) },
+    //   relations: ['author'],
+    // });
 
     const {
       title,
@@ -261,9 +278,12 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
       instructions,
     }: Partial<Recipe_TS> = req.body; // Partial<Recipe_TS> - all fields are optional
 
+    console.log('Request Body:', req.body); ////
+
     const existingRecipe = await recipeRepository.findOne({
       where: { id: Number(id) },
       relations: [
+        'author',
         'ingredients',
         'ingredients.ingredient',
         'instructions',
@@ -273,6 +293,19 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
 
     if (!existingRecipe) {
       res.status(404).json({ success: false, message: 'Recipe not found' });
+      return;
+    }
+
+    console.log('Existing Recipe:', existingRecipe); // Log the recipe details ////
+
+    console.log('Recipe.author.id:', existingRecipe.author.id); // Log the author ID ////
+    console.log(' req.user.userId:', req.user.userId); // Log the user ID ////
+
+    if (existingRecipe.author.id !== userId) {
+      res.status(403).json({
+        success: false,
+        message: 'You are not authorized to update this recipe',
+      });
       return;
     }
 
@@ -307,6 +340,9 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
       existingRecipe.category = category as CategoryEnum;
     }
 
+    console.log('Updated Recipe Fields:', existingRecipe); // Log the updated fields ////
+
+    //handle ingredients and instructions
     if (ingredients) {
       await handleUpdateIngredients(ingredients, existingRecipe);
     }
@@ -324,8 +360,11 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
         'ingredients.ingredient',
         'instructions',
         'instructions.instruction',
+        'author',
       ],
     });
+
+    console.log('Updated Recipe:', updatedRecipe); // Log the final updated recipe ////
 
     res.status(200).json({
       success: true,
