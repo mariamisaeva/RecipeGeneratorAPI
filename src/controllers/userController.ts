@@ -140,13 +140,13 @@ export const getCurrentUser = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  const user = filterUserInfo(req.user);
+  const safeUser = filterUserInfo(req.user);
 
   try {
     res.status(200).json({
       success: true,
       message: 'User profile retrieved successfully',
-      data: user,
+      data: safeUser,
     });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
