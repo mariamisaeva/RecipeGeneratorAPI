@@ -107,7 +107,7 @@ export const handleInstructions = async (
     stepNumber++;
   }
 
-  console.log('New Instructions:', newInstructions); ////
+  //   console.log('New Instructions:', newInstructions); ////
 
   return newInstructions;
 };
@@ -320,9 +320,6 @@ export const handleUpdateInstructions = async (
     where: { recipe: { id: recipe.id } },
     relations: ['instruction'],
   });
-  console.log('recipe.instructions: ', recipe.instructions); ////
-
-  console.log('New Instructions:', newInstructions); ////
 
   return newInstructions;
 };
