@@ -241,8 +241,6 @@ const getRecipeById = async (req: Request, res: Response) => {
 //================================================================//
 //UpdateRecipe //EditRecipe
 const updateRecipe = async (req: Request, res: Response): Promise<void> => {
-  console.log('updateRecipe Controller is Working...'); ////
-
   try {
     const { id } = req.params;
 
