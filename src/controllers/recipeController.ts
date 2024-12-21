@@ -285,7 +285,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    console.log('Recipe.author.id:', existingRecipe.author.id); // Log the author ID ////
     console.log(' req.user.userId:', req.user.userId); // Log the user ID ////
 
     if (existingRecipe.author.id !== userId) {
