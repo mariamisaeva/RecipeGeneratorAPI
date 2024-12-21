@@ -269,8 +269,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
       instructions,
     }: Partial<Recipe_TS> = req.body; // Partial<Recipe_TS> - all fields are optional
 
-    console.log('Request Body:', req.body); ////
-
     const existingRecipe = await recipeRepository.findOne({
       where: { id: Number(id) },
       relations: [
