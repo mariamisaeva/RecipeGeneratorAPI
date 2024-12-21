@@ -16,6 +16,7 @@ import {
 } from '../utils/helpers';
 import { CategoryEnum } from '../entities/Recipe';
 import { ILike } from 'typeorm';
+import { filterUserInfo } from '../utils/filterUserInfo';
 
 //GetAllRecipes
 const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
@@ -191,10 +192,7 @@ const createRecipe = async (req: Request, res: Response): Promise<void> => {
 
     const filteredRecipe = {
       ...fullNewRecipe,
-      author: {
-        id: fullNewRecipe?.author.id,
-        username: fullNewRecipe?.author.username,
-      },
+      author: filterUserInfo(fullNewRecipe!.author),
     };
 
     res.status(201).json({
@@ -350,10 +348,7 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
 
     const response = {
       ...updatedRecipe,
-      author: {
-        userId: updatedRecipe?.author.id,
-        username: updatedRecipe?.author.username,
-      },
+      author: filterUserInfo(updatedRecipe!.author),
     };
 
     res.status(200).json({
@@ -368,19 +363,39 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
 //================================================================//
 //DeleteRecipe
 const deleteRecipe = async (req: Request, res: Response): Promise<void> => {
+  console.log('deleteRecipe Controller is Working...'); ////
   try {
     const { id } = req.params;
+    console.log('id:', id); ////
+    console.log('req.user:', req.user); ////
+    // console.log('req.user.userId:', req.user.userId); ////
+    if (!req.user || !req.user.userId) {
+      res.status(401).json({ success: false, message: 'Unauthorized access' });
+      return;
+    }
 
     //Grab the repo
     const recipeRepository = AppDataSource.getRepository(Recipe);
+    const userId = req.user.userId;
+
+    console.log('userId:', userId); ////
 
     //find the recipe where id = id
     const recipe = await recipeRepository.findOne({
       where: { id: Number(id) },
+      relations: ['author'], //to check for ownership
     });
     //handle if not found
     if (!recipe) {
       res.status(404).json({ success: false, message: 'Recipe not found' });
+      return;
+    }
+
+    if (recipe.author.id !== userId) {
+      res.status(403).json({
+        success: false,
+        message: 'You are not authorized to delete this recipe',
+      });
       return;
     }
 
