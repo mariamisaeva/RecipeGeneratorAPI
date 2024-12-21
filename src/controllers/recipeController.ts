@@ -324,8 +324,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
       existingRecipe.category = category as CategoryEnum;
     }
 
-    console.log('Updated Recipe Fields:', existingRecipe); // Log the updated fields ////
-
     //handle ingredients and instructions
     if (ingredients) {
       await handleUpdateIngredients(ingredients, existingRecipe);
