@@ -344,8 +344,6 @@ const updateRecipe = async (req: Request, res: Response): Promise<void> => {
       ],
     });
 
-    console.log('Updated Recipe:', updatedRecipe); // Log the final updated recipe ////
-
     const response = {
       ...updatedRecipe,
       author: filterUserInfo(updatedRecipe!.author),
@@ -380,6 +378,7 @@ const deleteRecipe = async (req: Request, res: Response): Promise<void> => {
       where: { id: Number(id) },
       relations: ['author'], //to check for ownership
     });
+
     //handle if not found
     if (!recipe) {
       res.status(404).json({ success: false, message: 'Recipe not found' });
