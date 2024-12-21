@@ -378,8 +378,6 @@ const deleteRecipe = async (req: Request, res: Response): Promise<void> => {
     const recipeRepository = AppDataSource.getRepository(Recipe);
     const userId = req.user.userId;
 
-    console.log('userId:', userId); ////
-
     //find the recipe where id = id
     const recipe = await recipeRepository.findOne({
       where: { id: Number(id) },
