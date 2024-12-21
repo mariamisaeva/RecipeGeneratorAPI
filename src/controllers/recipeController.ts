@@ -366,7 +366,7 @@ const deleteRecipe = async (req: Request, res: Response): Promise<void> => {
   console.log('deleteRecipe Controller is Working...'); ////
   try {
     const { id } = req.params;
-    console.log('req.user:', req.user); ////
+
     // console.log('req.user.userId:', req.user.userId); ////
     if (!req.user || !req.user.userId) {
       res.status(401).json({ success: false, message: 'Unauthorized access' });
