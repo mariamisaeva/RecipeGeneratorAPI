@@ -450,11 +450,13 @@ const getFavoriteRecipes = async (
       image: fav.recipe.image,
       category: fav.recipe.category,
       favCounter: fav.recipe.favCounter,
+      ingredients: fav.recipe.ingredients,
+      instructions: fav.recipe.instructions,
       author: {
         userId: fav.recipe.author.id,
         username: fav.recipe.author.username,
-        email: fav.recipe.author.email,
       },
+      createdAt: fav.recipe.createdAt,
     }));
 
     res.status(200).json({
