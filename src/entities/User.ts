@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Recipe } from './Recipe';
-// import { FavoriteRecipe } from './FavoriteRecipe';
+import { FavoriteRecipe } from './FavoriteRecipe';
 import { MinLength, IsEmail, Matches } from 'class-validator';
 
 @Entity()
@@ -43,9 +43,9 @@ export class User {
   @OneToMany(() => Recipe, (r) => r.author)
   recipes!: Recipe[];
 
+  @OneToMany(() => FavoriteRecipe, (fr) => fr.user)
+  favoriteRecipes!: FavoriteRecipe[];
+
   @CreateDateColumn()
   createdAt!: Date;
-
-  //   @OneToMany(() => FavoriteRecipe, (fr) => fr.user)
-  //   favoriteRecipes!: FavoriteRecipe[];
 }
