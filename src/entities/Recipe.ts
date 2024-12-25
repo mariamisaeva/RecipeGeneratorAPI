@@ -11,7 +11,7 @@ import {
 import { RecipeInstruction } from './RecipeInstruction';
 import { RecipeIngredient } from './RecipeIngredient';
 import { User } from './User';
-// import { FavoriteRecipe } from './FavoriteRecipe';
+import { FavoriteRecipe } from './FavoriteRecipe';
 
 export enum CategoryEnum {
   Breakfast = 'breakfast',
@@ -79,6 +79,6 @@ export class Recipe {
   @Column({ default: 0 })
   favCounter!: number;
 
-  //   @OneToMany(() => FavoriteRecipe, (fr) => fr.recipe)
-  //   favoritedBy!: FavoriteRecipe[];
+  @OneToMany(() => FavoriteRecipe, (fr) => fr.recipe)
+  favoritedBy!: FavoriteRecipe[];
 }

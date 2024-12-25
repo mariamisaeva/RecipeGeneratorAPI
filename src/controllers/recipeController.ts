@@ -405,10 +405,43 @@ const deleteRecipe = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+//Favorite controllers
+const addFavoriteRecipe = async (req: Request, res: Response) => {
+  try {
+    console.log('Add Favorite Recipe is working ...');
+    res.status(200).json({ success: true, message: 'Favorite recipe added' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const deleteFavoriteRecipe = async (req: Request, res: Response) => {
+  console.log('Delete Favorite Recipe is working ...');
+  try {
+    res.status(200).json({ success: true, message: 'Favorite recipe deleted' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const getFavoriteRecipes = async (req: Request, res: Response) => {
+  console.log('Get Favorite Recipes is working...');
+  try {
+    res
+      .status(200)
+      .json({ success: true, message: 'Favorite recipes fetched' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 export {
   getAllRecipes,
   createRecipe,
   getRecipeById,
   updateRecipe,
   deleteRecipe,
+  addFavoriteRecipe,
+  deleteFavoriteRecipe,
+  getFavoriteRecipes,
 };
