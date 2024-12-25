@@ -468,10 +468,63 @@ const getFavoriteRecipes = async (
   }
 };
 
-const addFavoriteRecipe = async (req: Request, res: Response) => {
+const addFavoriteRecipe = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     console.log('Add Favorite Recipe is working ...');
-    res.status(200).json({ success: true, message: 'Favorite recipe added' });
+
+    const { id: recipeId } = req.params;
+
+    if (!req.user || !req.user.userId) {
+      res.status(401).json({ success: false, message: 'Unauthorized access' });
+      return;
+    }
+
+    const recipeRepository = AppDataSource.getRepository(Recipe);
+    const favoriteRepository = AppDataSource.getRepository(FavoriteRecipe);
+
+    //check if recipe exists
+    const recipe = await recipeRepository.findOne({
+      where: { id: Number(recipeId) },
+    });
+
+    if (!recipe) {
+      res.status(404).json({ success: false, message: 'Recipe not found' });
+      return;
+    }
+
+    //check if recipe is already favorited
+    const existingFavorite = await favoriteRepository.findOne({
+      where: {
+        user: { id: req.user.userId },
+        recipe: { id: Number(recipeId) },
+      },
+    });
+
+    if (existingFavorite) {
+      res
+        .status(400)
+        .json({ success: false, message: 'Recipe is already favorited' });
+      return;
+    }
+
+    //add recipe to favorites
+    const favorite = favoriteRepository.create({
+      user: { id: req.user.userId },
+      recipe,
+    });
+
+    await favoriteRepository.save(favorite);
+
+    //increment the favCounter
+    recipe.favCounter++;
+    await recipeRepository.save(recipe);
+
+    res
+      .status(201)
+      .json({ success: true, message: 'Recipe added to favorites' });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
   }
