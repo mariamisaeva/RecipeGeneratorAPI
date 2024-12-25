@@ -504,9 +504,10 @@ const addFavoriteRecipe = async (
     });
 
     if (existingFavorite) {
-      res
-        .status(400)
-        .json({ success: false, message: 'Recipe is already favorited' });
+      res.status(400).json({
+        success: false,
+        message: `Recipe ${recipe.title} is already favorited`,
+      });
       return;
     }
 
@@ -522,9 +523,10 @@ const addFavoriteRecipe = async (
     recipe.favCounter++;
     await recipeRepository.save(recipe);
 
-    res
-      .status(201)
-      .json({ success: true, message: 'Recipe added to favorites' });
+    res.status(201).json({
+      success: true,
+      message: `Recipe ${recipe.title}  added to favorites`,
+    });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -533,7 +535,47 @@ const addFavoriteRecipe = async (
 const removeFavoriteRecipe = async (req: Request, res: Response) => {
   console.log('Delete Favorite Recipe is working ...');
   try {
-    res.status(200).json({ success: true, message: 'Favorite recipe deleted' });
+    const { id: recipeId } = req.params;
+
+    if (!req.user || !req.user.userId) {
+      res.status(401).json({ success: false, message: 'Unauthorized access' });
+      return;
+    }
+
+    const recipeRepository = AppDataSource.getRepository(Recipe);
+    const favoriteRepository = AppDataSource.getRepository(FavoriteRecipe);
+
+    //check if recipe exists
+    const favorite = await favoriteRepository.findOne({
+      where: {
+        user: { id: req.user.userId },
+        recipe: { id: Number(recipeId) },
+      },
+    });
+
+    if (!favorite) {
+      res
+        .status(404)
+        .json({ success: false, message: 'Recipe not found in favorites' });
+      return;
+    }
+
+    await favoriteRepository.remove(favorite);
+
+    //decrement the favCounter
+    const recipe = await recipeRepository.findOne({
+      where: { id: Number(recipeId) },
+    });
+
+    if (recipe) {
+      recipe.favCounter = Math.max(0, recipe.favCounter - 1);
+      await recipeRepository.save(recipe);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Recipe ${recipe?.title} removed from favorites`,
+    });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
   }
