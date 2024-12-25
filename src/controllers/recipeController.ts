@@ -530,7 +530,7 @@ const addFavoriteRecipe = async (
   }
 };
 
-const deleteFavoriteRecipe = async (req: Request, res: Response) => {
+const removeFavoriteRecipe = async (req: Request, res: Response) => {
   console.log('Delete Favorite Recipe is working ...');
   try {
     res.status(200).json({ success: true, message: 'Favorite recipe deleted' });
@@ -546,6 +546,6 @@ export {
   updateRecipe,
   deleteRecipe,
   addFavoriteRecipe,
-  deleteFavoriteRecipe,
+  removeFavoriteRecipe,
   getFavoriteRecipes,
 };

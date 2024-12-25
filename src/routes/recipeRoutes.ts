@@ -6,7 +6,7 @@ import {
   updateRecipe,
   deleteRecipe,
   addFavoriteRecipe,
-  deleteFavoriteRecipe,
+  removeFavoriteRecipe,
   getFavoriteRecipes,
 } from '../controllers/recipeController';
 import { authenticateUser } from '../utils/authMiddleware';
@@ -23,6 +23,6 @@ RecipeRouter.put('/edit/:id', authenticateUser, updateRecipe); //  /api/recipes/
 RecipeRouter.delete('/:id', authenticateUser, deleteRecipe); //  /api/recipes/:id
 
 RecipeRouter.post('/:id/favorite', authenticateUser, addFavoriteRecipe); //  /api/recipes/:id/favorite
-RecipeRouter.delete('/:id/favorite', authenticateUser, deleteFavoriteRecipe); //  /api/recipes/:id/favorite
+RecipeRouter.delete('/:id/favorite', authenticateUser, removeFavoriteRecipe); //  /api/recipes/:id/favorite
 
 export default RecipeRouter;
