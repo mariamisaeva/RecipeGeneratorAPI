@@ -17,6 +17,7 @@ import {
 import { CategoryEnum } from '../entities/Recipe';
 import { ILike } from 'typeorm';
 import { filterUserInfo } from '../utils/filterUserInfo';
+import { FavoriteRecipe } from '../entities/FavoriteRecipe';
 
 //GetAllRecipes
 const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
@@ -406,6 +407,67 @@ const deleteRecipe = async (req: Request, res: Response): Promise<void> => {
 };
 
 //Favorite controllers
+const getFavoriteRecipes = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  console.log('Get Favorite Recipes is working...');
+  console.log('Request Params:', req.params); // Log params
+  console.log('Request Query:', req.query); // Log query parameters
+  console.log('Request Body:', req.body); // Log body (if any)
+  try {
+    if (!req.user || !req.user.userId) {
+      res.status(401).json({ success: false, message: 'Unauthorized access' });
+      return;
+    }
+
+    const favoriteRepository = AppDataSource.getRepository(FavoriteRecipe);
+
+    const favorites = await favoriteRepository.find({
+      where: { user: { id: req.user.userId } },
+      relations: [
+        'recipe',
+        'recipe.author',
+        'recipe.ingredients',
+        'recipe.instructions',
+      ],
+    });
+
+    if (favorites.length === 0) {
+      res
+        .status(200)
+        .json({ success: true, message: 'No favorite recipes found' });
+      return;
+    }
+
+    const formattedFavorites = favorites.map((fav) => ({
+      id: fav.recipe.id,
+      title: fav.recipe.title,
+      description: fav.recipe.description,
+      isVegetarian: fav.recipe.isVegetarian,
+      servings: fav.recipe.servings,
+      time: fav.recipe.time,
+      image: fav.recipe.image,
+      category: fav.recipe.category,
+      favCounter: fav.recipe.favCounter,
+      author: {
+        userId: fav.recipe.author.id,
+        username: fav.recipe.author.username,
+        email: fav.recipe.author.email,
+      },
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: 'Favorite recipes fetched',
+      data: formattedFavorites,
+    });
+  } catch (err: any) {
+    console.error('Error fetching favorite recipes:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 const addFavoriteRecipe = async (req: Request, res: Response) => {
   try {
     console.log('Add Favorite Recipe is working ...');
@@ -419,17 +481,6 @@ const deleteFavoriteRecipe = async (req: Request, res: Response) => {
   console.log('Delete Favorite Recipe is working ...');
   try {
     res.status(200).json({ success: true, message: 'Favorite recipe deleted' });
-  } catch (err: any) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
-
-const getFavoriteRecipes = async (req: Request, res: Response) => {
-  console.log('Get Favorite Recipes is working...');
-  try {
-    res
-      .status(200)
-      .json({ success: true, message: 'Favorite recipes fetched' });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
   }

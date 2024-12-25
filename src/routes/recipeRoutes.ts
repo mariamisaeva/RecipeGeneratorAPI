@@ -14,6 +14,8 @@ import { authenticateUser } from '../utils/authMiddleware';
 const RecipeRouter = express.Router();
 
 RecipeRouter.get('/', getAllRecipes); //  /api/recipes
+RecipeRouter.get('/favorites', authenticateUser, getFavoriteRecipes);
+
 RecipeRouter.post('/create-recipe', authenticateUser, createRecipe); //  /api/recipes/create-recipe
 
 RecipeRouter.get('/:id', getRecipeById); //  /api/recipes/:id
@@ -22,6 +24,5 @@ RecipeRouter.delete('/:id', authenticateUser, deleteRecipe); //  /api/recipes/:i
 
 RecipeRouter.post('/:id/favorite', authenticateUser, addFavoriteRecipe); //  /api/recipes/:id/favorite
 RecipeRouter.delete('/:id/favorite', authenticateUser, deleteFavoriteRecipe); //  /api/recipes/:id/favorite
-RecipeRouter.get('/favorites', authenticateUser, getFavoriteRecipes); //  /api/recipes/favorites
 
 export default RecipeRouter;

@@ -62,3 +62,9 @@ export interface User_TS {
   recipes: Recipe_TS[];
   createdAt: Date;
 }
+
+export interface FavoriteRecipe_TS {
+  id?: number;
+  user: { id: number; username: string };
+  recipe: Recipe_TS;
+}
