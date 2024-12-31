@@ -29,6 +29,7 @@ export const AppDataSource = new DataSource({
   ], //schemas
   synchronize: true, // this will auto create tables based on the entities
   // set to FALSE in production to avoid data loss
+  //   dropSchema: true, // set to TRUE to drop the schema and recreate the tables
   logging: false, // set to TRUE to see the SQL queries in the console
   migrations: [],
   subscribers: [],
