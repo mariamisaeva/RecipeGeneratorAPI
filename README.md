@@ -31,15 +31,86 @@ The **Recipe Generator API** is a RESTful service designed for users to explore,
 
 The API uses JSON Web Tokens (JWT) for authentication. Users must obtain a token by logging in or registering. The token is then included in the `Authorization` header of subsequent requests. The token is valid for 1 day.
 
-## Endpoints
-
 ```c
-Base URL: http://localhost:4000/api
+Authorization: Bearer <JWT_TOKEN>
 ```
 
-### Recipes
+## Endpoints
 
-#### Get All Recipes
+Base URL: `http://localhost:4000/api`
+
+## 1. User Endpoints
+
+### 1.1 **Register User**
+
+- **Description**: Creates a new user.
+- **Method**: `POST`
+
+```bash
+ /users/register
+```
+
+Request Body:
+
+```json
+{
+  "username": "exampleUser",
+  "email": "example@email.com",
+  "password": "Password123!"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "User created successfully",
+  "data": {
+    "id": "uuid",
+    "username": "exampleUser",
+    "email": "example@email.com"
+  }
+}
+```
+
+### 1.2 **Login User**
+
+- **Description**: Logs in a user and generates a JWT token.
+- **Method**: `POST`
+
+```bash
+  /users/login
+```
+
+Request Body:
+
+```json
+{
+  "email": "example@email.com",
+  "password": "Password123"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "User logged in successfully",
+  "token": "JWT_TOKEN",
+  "user": {
+    "id": "uuid",
+    "username": "exampleUser",
+    "email": "example@email.com"
+  }
+}
+```
+
+<!--
+## 2. Recipe Endpoints
+
+### 2.1 Get All Recipes
 
 ```c
 {
@@ -78,4 +149,4 @@ Base URL: http://localhost:4000/api
     "pageSize": 5
   }
 }
-```
+``` -->
