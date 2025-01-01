@@ -45,9 +45,10 @@ Base URL: `http://localhost:4000/api`
 
 - **Description**: Creates a new user.
 - **Method**: `POST`
+- **Endpoint**: `/users/register`
 
 ```bash
- /users/register
+POST /users/register
 ```
 
 Request Body:
@@ -78,9 +79,10 @@ Response:
 
 - **Description**: Logs in a user and generates a JWT token.
 - **Method**: `POST`
+- **Endpoint**: `/users/login`
 
 ```bash
-  /users/login
+POST  /users/login
 ```
 
 Request Body:
@@ -101,6 +103,31 @@ Response:
   "token": "JWT_TOKEN",
   "user": {
     "id": "uuid",
+    "username": "exampleUser",
+    "email": "example@email.com"
+  }
+}
+```
+
+### 1.3 Get Current User Profile
+
+- **Description**: Fetches the current authenticated user's profile.
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer JWT_TOKEN`
+- **Endpoint**: `/users/profile`
+
+```bash
+GET /users/profile
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "User profile retrieved successfully",
+  "data": {
+    "userId": "uuid",
     "username": "exampleUser",
     "email": "example@email.com"
   }
