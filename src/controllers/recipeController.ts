@@ -34,7 +34,6 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
     } = req.query as RecipeQueryParams;
     const pageNumber = Number(page); //parseInt(page as string, 10);
     const pageSize = Number(limit); //parseInt(limit as string, 10);
-    // const offset = (pageNumber - 1) * pageSize;
 
     //query filters
     const filters: any = {
@@ -44,8 +43,6 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
       ...(isVegetarian && { isVegetarian: isVegetarian === 'true' }),
       ...(time && { time: parseInt(time, 10) }),
     };
-
-    // const filterApplied = Object.keys(filters).length > 0;
 
     const fetchAllRecipes = await recipeRepository.find({
       where: [
@@ -72,14 +69,9 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
         ingredients: { indexNumber: 'ASC' },
         instructions: { stepNumber: 'ASC' },
       },
-      //   skip: offset,
-      //   take: pageSize,
     });
 
     const total = fetchAllRecipes.length;
-
-    console.log('fetchAllRecipes:', fetchAllRecipes);
-    console.log('total:', total);
 
     const PaginatedRecipes = fetchAllRecipes.slice(
       (pageNumber - 1) * pageSize,
