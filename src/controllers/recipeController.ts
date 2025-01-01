@@ -27,14 +27,14 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
     const {
       keyword = '',
       page = 1,
-      limit = 10,
+      limit = 6,
       category,
       isVegetarian,
       time,
-    } = req.query as unknown as RecipeQueryParams;
-    const pageNumber = parseInt(page as string, 10);
-    const pageSize = parseInt(limit as string, 10);
-    const offset = (pageNumber - 1) * pageSize;
+    } = req.query as RecipeQueryParams;
+    const pageNumber = Number(page); //parseInt(page as string, 10);
+    const pageSize = Number(limit); //parseInt(limit as string, 10);
+    // const offset = (pageNumber - 1) * pageSize;
 
     //query filters
     const filters: any = {
@@ -45,7 +45,9 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
       ...(time && { time: parseInt(time, 10) }),
     };
 
-    const [fetchAllRecipes, total] = await recipeRepository.findAndCount({
+    // const filterApplied = Object.keys(filters).length > 0;
+
+    const fetchAllRecipes = await recipeRepository.find({
       where: [
         { title: ILike(`%${keyword}%`), ...filters },
         { description: ILike(`%${keyword}%`), ...filters },
@@ -70,17 +72,29 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
         ingredients: { indexNumber: 'ASC' },
         instructions: { stepNumber: 'ASC' },
       },
-      skip: offset,
-      take: pageSize,
+      //   skip: offset,
+      //   take: pageSize,
     });
 
-    if (fetchAllRecipes.length === 0) {
+    const total = fetchAllRecipes.length;
+
+    console.log('fetchAllRecipes:', fetchAllRecipes);
+    console.log('total:', total);
+
+    const PaginatedRecipes = fetchAllRecipes.slice(
+      (pageNumber - 1) * pageSize,
+      pageNumber * pageSize,
+    );
+
+    if (PaginatedRecipes.length === 0) {
       res.status(404).json({ success: false, message: 'No recipes found' });
       return;
     }
 
+    console.log(PaginatedRecipes);
+
     //formatted response
-    const formattedRecipes = fetchAllRecipes.map((rec) => ({
+    const formattedRecipes = PaginatedRecipes.map((rec) => ({
       id: rec.id,
       title: rec.title,
       description: rec.description,
@@ -108,7 +122,7 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
 
     const response: GetAllRecipesResponse = {
       success: true,
-      message: 'Getting all recipes...',
+      message: 'All recipes fetched',
       data: formattedRecipes,
       pagination,
     };
