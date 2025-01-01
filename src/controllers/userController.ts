@@ -177,6 +177,7 @@ const getUserRecipes = async (req: Request, res: Response): Promise<void> => {
       res
         .status(404)
         .json({ success: false, message: 'No recipes found for this user' });
+      return;
     }
 
     // Format response

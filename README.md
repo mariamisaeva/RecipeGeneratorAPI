@@ -5,6 +5,11 @@
 1. [Introduction](#introduction)
 2. [Authentication](#authentication)
 3. [Endpoints](#endpoints)
+   - [1. User Endpoints](#1-user-endpoints)
+     - [1.1 Register User](#11-register-user)
+     - [1.2 Login User](#12-login-user)
+     - [1.3 Get Current User Profile](#13-get-current-user-profile)
+     - [1.4 Get Recipes By User](#14-get-recipes-by-user)
    - [Recipes](#recipes)
      - [Get All Recipes](#get-all-recipes)
      - [Get Recipe By ID](#get-recipe-by-id)
@@ -14,11 +19,6 @@
      - [Add Favorite Recipe](#add-favorite-recipe)
      - [Remove Favorite Recipe](#remove-favorite-recipe)
      - [Get Favorite Recipes](#get-favorite-recipes)
-   - [Users](#users)
-     - [Register User](#register-user)
-     - [Login User](#login-user)
-     - [Get Current User Profile](#get-current-user-profile)
-     - [Get Recipes By User](#get-recipes-by-user)
 4. [Pagination](#pagination)
 5. [Error Handling](#error-handling)
 6. [Examples](#examples)
@@ -75,7 +75,7 @@ Response:
 }
 ```
 
-### 1.2 **Login User**
+### 1.2 Login User
 
 - **Description**: Logs in a user and generates a JWT token.
 - **Method**: `POST`
@@ -132,6 +132,24 @@ Response:
     "email": "example@email.com"
   }
 }
+```
+
+### 1.4 Get Recipes By User
+
+- **Description**: Retrieves a list of recipes created by the authenticated user.
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer JWT_TOKEN`
+- **Endpoint**: `/users/user/:id`
+- **Query Parameters**: `:userId`
+
+```bash
+GET /users/user/:id
+```
+
+Response:
+
+```json
+
 ```
 
 <!--
