@@ -33,8 +33,8 @@ export interface Instruction_TS {
 
 export interface RecipeQueryParams {
   keyword?: string;
-  page?: string;
-  limit?: string;
+  page?: Number;
+  limit?: Number;
   category?: string;
   isVegetarian?: string;
   time?: string;
@@ -61,4 +61,10 @@ export interface User_TS {
   password: string;
   recipes: Recipe_TS[];
   createdAt: Date;
+}
+
+export interface FavoriteRecipe_TS {
+  id?: number;
+  user: { id: number; username: string };
+  recipe: Recipe_TS;
 }

@@ -10,4 +10,5 @@ export class Instruction {
 
   @OneToMany(() => RecipeInstruction, (ri) => ri.instruction)
   recipeInstructions!: RecipeInstruction[];
+  stepNumber!: number;
 }

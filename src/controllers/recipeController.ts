@@ -17,6 +17,7 @@ import {
 import { CategoryEnum } from '../entities/Recipe';
 import { ILike } from 'typeorm';
 import { filterUserInfo } from '../utils/filterUserInfo';
+import { FavoriteRecipe } from '../entities/FavoriteRecipe';
 
 //GetAllRecipes
 const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
@@ -26,14 +27,14 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
     const {
       keyword = '',
       page = 1,
-      limit = 10,
+      limit = 6,
       category,
       isVegetarian,
       time,
-    } = req.query as unknown as RecipeQueryParams;
-    const pageNumber = parseInt(page as string, 10);
-    const pageSize = parseInt(limit as string, 10);
-    const offset = (pageNumber - 1) * pageSize;
+    } = req.query as RecipeQueryParams;
+    const pageNumber = Number(page); //parseInt(page as string, 10);
+    const pageSize = Number(limit); //parseInt(limit as string, 10);
+    // const offset = (pageNumber - 1) * pageSize;
 
     //query filters
     const filters: any = {
@@ -44,7 +45,9 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
       ...(time && { time: parseInt(time, 10) }),
     };
 
-    const [fetchAllRecipes, total] = await recipeRepository.findAndCount({
+    // const filterApplied = Object.keys(filters).length > 0;
+
+    const fetchAllRecipes = await recipeRepository.find({
       where: [
         { title: ILike(`%${keyword}%`), ...filters },
         { description: ILike(`%${keyword}%`), ...filters },
@@ -69,17 +72,29 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
         ingredients: { indexNumber: 'ASC' },
         instructions: { stepNumber: 'ASC' },
       },
-      skip: offset,
-      take: pageSize,
+      //   skip: offset,
+      //   take: pageSize,
     });
 
-    if (fetchAllRecipes.length === 0) {
+    const total = fetchAllRecipes.length;
+
+    console.log('fetchAllRecipes:', fetchAllRecipes);
+    console.log('total:', total);
+
+    const PaginatedRecipes = fetchAllRecipes.slice(
+      (pageNumber - 1) * pageSize,
+      pageNumber * pageSize,
+    );
+
+    if (PaginatedRecipes.length === 0) {
       res.status(404).json({ success: false, message: 'No recipes found' });
       return;
     }
 
+    console.log(PaginatedRecipes);
+
     //formatted response
-    const formattedRecipes = fetchAllRecipes.map((rec) => ({
+    const formattedRecipes = PaginatedRecipes.map((rec) => ({
       id: rec.id,
       title: rec.title,
       description: rec.description,
@@ -107,7 +122,7 @@ const getAllRecipes = async (req: Request, res: Response): Promise<void> => {
 
     const response: GetAllRecipesResponse = {
       success: true,
-      message: 'Getting all recipes...',
+      message: 'All recipes fetched',
       data: formattedRecipes,
       pagination,
     };
@@ -406,30 +421,177 @@ const deleteRecipe = async (req: Request, res: Response): Promise<void> => {
 };
 
 //Favorite controllers
-const addFavoriteRecipe = async (req: Request, res: Response) => {
+const getFavoriteRecipes = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  console.log('Get Favorite Recipes is working...');
+  console.log('Request Params:', req.params); // Log params
+  console.log('Request Query:', req.query); // Log query parameters
+  console.log('Request Body:', req.body); // Log body (if any)
+  try {
+    if (!req.user || !req.user.userId) {
+      res.status(401).json({ success: false, message: 'Unauthorized access' });
+      return;
+    }
+
+    const favoriteRepository = AppDataSource.getRepository(FavoriteRecipe);
+
+    const favorites = await favoriteRepository.find({
+      where: { user: { id: req.user.userId } },
+      relations: [
+        'recipe',
+        'recipe.author',
+        'recipe.ingredients',
+        'recipe.instructions',
+      ],
+    });
+
+    if (favorites.length === 0) {
+      res
+        .status(200)
+        .json({ success: true, message: 'No favorite recipes found' });
+      return;
+    }
+
+    const formattedFavorites = favorites.map((fav) => ({
+      id: fav.recipe.id,
+      title: fav.recipe.title,
+      description: fav.recipe.description,
+      isVegetarian: fav.recipe.isVegetarian,
+      servings: fav.recipe.servings,
+      time: fav.recipe.time,
+      image: fav.recipe.image,
+      category: fav.recipe.category,
+      favCounter: fav.recipe.favCounter,
+      ingredients: fav.recipe.ingredients,
+      instructions: fav.recipe.instructions,
+      author: {
+        userId: fav.recipe.author.id,
+        username: fav.recipe.author.username,
+      },
+      createdAt: fav.recipe.createdAt,
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: 'Favorite recipes fetched',
+      data: formattedFavorites,
+    });
+  } catch (err: any) {
+    console.error('Error fetching favorite recipes:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const addFavoriteRecipe = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     console.log('Add Favorite Recipe is working ...');
-    res.status(200).json({ success: true, message: 'Favorite recipe added' });
+
+    const { id: recipeId } = req.params;
+
+    if (!req.user || !req.user.userId) {
+      res.status(401).json({ success: false, message: 'Unauthorized access' });
+      return;
+    }
+
+    const recipeRepository = AppDataSource.getRepository(Recipe);
+    const favoriteRepository = AppDataSource.getRepository(FavoriteRecipe);
+
+    //check if recipe exists
+    const recipe = await recipeRepository.findOne({
+      where: { id: Number(recipeId) },
+    });
+
+    if (!recipe) {
+      res.status(404).json({ success: false, message: 'Recipe not found' });
+      return;
+    }
+
+    //check if recipe is already favorited
+    const existingFavorite = await favoriteRepository.findOne({
+      where: {
+        user: { id: req.user.userId },
+        recipe: { id: Number(recipeId) },
+      },
+    });
+
+    if (existingFavorite) {
+      res.status(400).json({
+        success: false,
+        message: `Recipe ${recipe.title} is already favorited`,
+      });
+      return;
+    }
+
+    //add recipe to favorites
+    const favorite = favoriteRepository.create({
+      user: { id: req.user.userId },
+      recipe,
+    });
+
+    await favoriteRepository.save(favorite);
+
+    //increment the favCounter
+    recipe.favCounter++;
+    await recipeRepository.save(recipe);
+
+    res.status(201).json({
+      success: true,
+      message: `Recipe ${recipe.title}  added to favorites`,
+    });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
   }
 };
 
-const deleteFavoriteRecipe = async (req: Request, res: Response) => {
+const removeFavoriteRecipe = async (req: Request, res: Response) => {
   console.log('Delete Favorite Recipe is working ...');
   try {
-    res.status(200).json({ success: true, message: 'Favorite recipe deleted' });
-  } catch (err: any) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
+    const { id: recipeId } = req.params;
 
-const getFavoriteRecipes = async (req: Request, res: Response) => {
-  console.log('Get Favorite Recipes is working...');
-  try {
-    res
-      .status(200)
-      .json({ success: true, message: 'Favorite recipes fetched' });
+    if (!req.user || !req.user.userId) {
+      res.status(401).json({ success: false, message: 'Unauthorized access' });
+      return;
+    }
+
+    const recipeRepository = AppDataSource.getRepository(Recipe);
+    const favoriteRepository = AppDataSource.getRepository(FavoriteRecipe);
+
+    //check if recipe exists
+    const favorite = await favoriteRepository.findOne({
+      where: {
+        user: { id: req.user.userId },
+        recipe: { id: Number(recipeId) },
+      },
+    });
+
+    if (!favorite) {
+      res
+        .status(404)
+        .json({ success: false, message: 'Recipe not found in favorites' });
+      return;
+    }
+
+    await favoriteRepository.remove(favorite);
+
+    //decrement the favCounter
+    const recipe = await recipeRepository.findOne({
+      where: { id: Number(recipeId) },
+    });
+
+    if (recipe) {
+      recipe.favCounter = Math.max(0, recipe.favCounter - 1);
+      await recipeRepository.save(recipe);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Recipe ${recipe?.title} removed from favorites`,
+    });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -442,6 +604,6 @@ export {
   updateRecipe,
   deleteRecipe,
   addFavoriteRecipe,
-  deleteFavoriteRecipe,
+  removeFavoriteRecipe,
   getFavoriteRecipes,
 };
