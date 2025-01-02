@@ -10,7 +10,7 @@
      - [1.2 Login User](#12-login-user)
      - [1.3 Get Current User Profile](#13-get-current-user-profile)
      - [1.4 Get Recipes By User](#14-get-recipes-by-user)
-   - [Recipes](#recipes)
+   - [2. Recipe Endpoints](#2-recipe-endpoints)
      - [Get All Recipes](#get-all-recipes)
      - [Get Recipe By ID](#get-recipe-by-id)
      - [Create Recipe](#create-recipe)
@@ -259,49 +259,309 @@ Response:
 }
 ```
 
-<!--
 ## 2. Recipe Endpoints
+
+The Recipe Endpoints allow users to perform CRUD (Create, Read, Update, Delete) operations on recipes. Additionally, users can manage their favorite recipes.
 
 ### 2.1 Get All Recipes
 
-```c
+- **Description**: Fetches all recipes with optional query filters and pagination.
+- **Method**: `GET`
+- **Endpoint**: `/api/recipes`
+
+```bash
+GET /api/recipes
+```
+
+- **Query Parameters**:
+
+| Parameter      | Type      | Description                                            |
+| -------------- | --------- | ------------------------------------------------------ |
+| `keyword`      | `string`  | Search term to filter recipes by title or description. |
+| `page`         | `number`  | Current page for pagination (default: 1).              |
+| `limit`        | `number`  | Number of recipes per page (default: 6).               |
+| `category`     | `string`  | Filter recipes by category (e.g., `dinner`).           |
+| `isVegetarian` | `boolean` | Filter recipes by vegetarian status.                   |
+| `time`         | `number`  | Filter recipes by time required (in minutes).          |
+
+- **Response**:
+
+```json
 {
   "success": true,
   "message": "All recipes fetched",
   "data": [
     {
       "id": 1,
-      "title": "Vegetarian Pasta",
-      "description": "A delicious vegetarian pasta recipe.",
+      "title": "Pasta",
+      "description": "Delicious pasta recipe",
       "isVegetarian": true,
       "servings": 4,
-      "time": 30,
-      "image": "https://example.com/image1.jpg",
+      "time": "30 minutes",
+      "image": "https://example.com/image.jpg",
       "category": "dinner",
       "ingredients": [
-        { "id": 1, "name": "Pasta", "quantity": "200g" },
-        { "id": 2, "name": "Tomato Sauce", "quantity": "100ml" }
+        { "ingredient": { "name": "Pasta" }, "quantity": 200, "unit": "grams" }
       ],
       "instructions": [
-        { "id": 1, "step": "Boil the pasta." },
-        { "id": 2, "step": "Mix with tomato sauce." }
+        { "instruction": { "step": "Boil pasta." }, "stepNumber": 1 }
       ],
       "author": {
-        "userId": 10,
-        "username": "ChefJohn"
+        "userId": "uuid",
+        "username": "exampleUser"
       },
-      "createdAt": "2025-01-01T10:00:00.000Z",
-      "updatedAt": "2025-01-01T12:00:00.000Z"
+      "createdAt": "2023-12-30T12:00:00Z",
+      "updatedAt": "2023-12-30T12:00:00Z"
     }
   ],
   "pagination": {
-    "total": 30,
-    "currentPage": 2,
-    "totalPages": 6,
-    "pageSize": 5
+    "total": 20,
+    "currentPage": 1,
+    "totalPages": 4,
+    "pageSize": 6
   }
 }
-``` -->
+```
+
+### 2.2 Get Recipe By ID
+
+- **Description**: Fetches a specific recipe by its ID.
+- **Method**: `GET`
+- **Endpoint**: `/api/recipes/:id`
+- **Path Parameter**:
+
+| Parameter | Type     | Description          |
+| --------- | -------- | -------------------- |
+| `id`      | `number` | The ID of the recipe |
+
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Getting recipe by id...",
+  "data": {
+    "id": 1,
+    "title": "Pasta",
+    "description": "Delicious pasta recipe",
+    "isVegetarian": true,
+    "servings": 4,
+    "time": "30 minutes",
+    "image": "https://example.com/image.jpg",
+    "category": "dinner",
+    "ingredients": [
+      { "ingredient": { "name": "Pasta" }, "quantity": 200, "unit": "grams" }
+    ],
+    "instructions": [
+      { "instruction": { "step": "Boil pasta." }, "stepNumber": 1 }
+    ],
+    "author": {
+      "userId": "uuid",
+      "username": "exampleUser"
+    },
+    "createdAt": "2023-12-30T12:00:00Z",
+    "updatedAt": "2023-12-30T12:00:00Z"
+  }
+}
+```
+
+### 2.3 Create Recipe
+
+- **Description**: Creates a new recipe.
+- **Method**: `POST`
+- **Endpoint**: `/api/recipes/create-recipe`
+- **Headers**:Requires `Authorization: Bearer JWT_TOKEN.`
+- **Request Body**:
+
+```json
+{
+  "title": "Pasta",
+  "description": "Delicious pasta recipe",
+  "isVegetarian": true,
+  "servings": 4,
+  "time": "30 minutes",
+  "image": "https://example.com/image.jpg",
+  "category": "dinner",
+  "ingredients": [
+    { "ingredient": { "name": "Pasta" }, "quantity": 200, "unit": "grams" }
+  ],
+  "instructions": [
+    { "instruction": { "step": "Boil pasta." }, "stepNumber": 1 }
+  ]
+}
+```
+
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Recipe created successfully",
+  "data": {
+    "id": 1,
+    "title": "Pasta",
+    "description": "Delicious pasta recipe",
+    "isVegetarian": true,
+    "servings": 4,
+    "time": "30 minutes",
+    "image": "https://example.com/image.jpg",
+    "category": "dinner",
+    "ingredients": [
+      { "ingredient": { "name": "Pasta" }, "quantity": 200, "unit": "grams" }
+    ],
+    "instructions": [
+      { "instruction": { "step": "Boil pasta." }, "stepNumber": 1 }
+    ],
+    "author": {
+      "userId": "uuid",
+      "username": "exampleUser"
+    },
+    "createdAt": "2023-12-30T12:00:00Z",
+    "updatedAt": "2023-12-30T12:00:00Z"
+  }
+}
+```
+
+### 2.4 Update Recipe
+
+- **Description**: Updates an existing recipe.
+- **Method**: `PUT`
+- **Endpoint**: `/api/recipes/edit/:id`
+- **Headers**: Requires `Authorization: Bearer JWT_TOKEN.`
+- **Request Body**:
+
+```json
+{
+  "title": "Updated Pasta Recipe",
+  "description": "Updated description",
+  "isVegetarian": false,
+  "servings": 6,
+  "time": "45 minutes",
+  "image": "https://example.com/image-updated.jpg",
+  "category": "lunch",
+  "ingredients": [
+    { "ingredient": { "name": "Cheese" }, "quantity": 50, "unit": "grams" }
+  ],
+  "instructions": [
+    { "instruction": { "step": "Add cheese to pasta." }, "stepNumber": 2 }
+  ]
+}
+```
+
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Recipe updated successfully",
+  "data": {
+    "id": 1,
+    "title": "Updated Pasta Recipe",
+    "description": "Updated description",
+    "isVegetarian": false,
+    "servings": 6,
+    "time": "45 minutes",
+    "image": "https://example.com/image-updated.jpg",
+    "category": "lunch",
+    "ingredients": [
+      { "ingredient": { "name": "Cheese" }, "quantity": 50, "unit": "grams" }
+    ],
+    "instructions": [
+      { "instruction": { "step": "Add cheese to pasta." }, "stepNumber": 2 }
+    ],
+    "author": {
+      "userId": "uuid",
+      "username": "exampleUser"
+    },
+    "createdAt": "2023-12-30T12:00:00Z",
+    "updatedAt": "2023-12-30T12:00:00Z"
+  }
+}
+```
+
+### 2.5 Delete Recipe
+
+- **Description**: Deletes an existing recipe.
+- **Method**: `DELETE`
+- **Endpoint**: `/api/recipes/:id`
+- **Headers**: Requires `Authorization: Bearer JWT_TOKEN.`
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Recipe [Recipe Title] deleted successfully"
+}
+```
+
+### 2.6 Get Favorite Recipes
+
+- **Description**: Retrieves the user's favorite recipes.
+- **Method**: `GET`
+- **Endpoint**:`/api/recipes/favorites`
+- **Headers**: Requires `Authorization: Bearer JWT_TOKEN.`
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Favorite recipes fetched",
+  "data": [
+    {
+      "id": 1,
+      "title": "Pasta",
+      "description": "Delicious pasta recipe",
+      "isVegetarian": true,
+      "servings": 4,
+      "time": "30 minutes",
+      "image": "https://example.com/image.jpg",
+      "category": "dinner",
+      "favCounter": 10,
+      "ingredients": [
+        { "ingredient": { "name": "Pasta" }, "quantity": 200, "unit": "grams" }
+      ],
+      "instructions": [
+        { "instruction": { "step": "Boil pasta." }, "stepNumber": 1 }
+      ],
+      "author": {
+        "userId": "uuid",
+        "username": "exampleUser"
+      },
+      "createdAt": "2023-12-30T12:00:00Z"
+    }
+  ]
+}
+```
+
+### 2.7 Add Favorite Recipe
+
+- **Description**: Adds a recipe to the user's favorites.
+- **Method**: `POST`
+- **Endpoint**: `/api/recipes/:id/favorite`
+- **Headers**: Requires `Authorization: Bearer JWT_TOKEN.`
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Recipe [Recipe Title] added to favorites"
+}
+```
+
+### 2.8 Remove Favorite Recipe
+
+- **Description**: Removes a recipe from the user's favorites.
+- **Method**: `DELETE`
+- **Endpoint**: `/api/recipes/:id/favorite`
+- **Headers**: Requires `Authorization: Bearer JWT_TOKEN.`
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Recipe [Recipe Title] removed from favorites"
+}
+```
 
 ## Error Handling
 
