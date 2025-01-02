@@ -302,3 +302,127 @@ Response:
   }
 }
 ``` -->
+
+## Error Handling
+
+### Error Handling for User Endpoints
+
+The following errors apply to all **User Endpoints** in the Recipe Generator API. Each section specifies unique scenarios and general patterns.
+
+---
+
+## Common Error Responses
+
+| **Error**                    | **Message**                           | **HTTP Code**  |
+| ---------------------------- | ------------------------------------- | -------------- |
+| Missing Required Fields      | `All fields are required.`            | `400`          |
+| Validation Error             | `Validation failed.`                  | `400`          |
+| Duplicate User               | `User already exists.`                | `409`          |
+| Invalid Email or Password    | `Invalid email or password.`          | `401` or `404` |
+| Missing or Invalid JWT Token | `Access token is missing or invalid.` | `401`          |
+| Expired or Invalid JWT Token | `Token is invalid or expired.`        | `403`          |
+| Unauthorized Access          | `Unauthorized access.`                | `403`          |
+| Resource Not Found           | `No recipes found for this user.`     | `404`          |
+| Internal Server Error        | `Internal server error.`              | `500`          |
+
+---
+
+## Error Scenarios and Handling
+
+1. **Missing Fields**
+
+   This error occurs when required fields are missing in the request body.
+
+   - **Example Scenarios**:
+   - Missing `username`, `email`, or `password` during registration.
+   - Missing `email` or `password` during login.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "All fields are required."
+   }
+   ```
+
+   - HTTP Status Code: `400 Bad Request`
+
+2. **Duplicate User**
+
+   This error occurs when a user attempts to register with an already existing `username` or `email`.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "User already exists."
+   }
+   ```
+
+   - HTTP Status Code: `409 Conflict`
+
+3. **Validation Errors**
+
+   This error occurs when the provided data does not meet validation constraints defined in the User entity.
+
+   - **Example Scenarios**:
+
+     - `username` is shorter than 3 characters.
+     - `password` does not meet complexity requirements.
+
+   - Response:
+
+   ```json
+   {
+     "success": false,
+     "message": "Validation failed",
+     "errors": [
+       {
+         "field": "password",
+         "message": ["Password must contain at least one uppercase letter"]
+       }
+     ]
+   }
+   ```
+
+   - HTTP Status Code: `400 Bad Request`
+
+4. **Invalid Email or Password**
+
+   This error occurs during login when:
+
+   - The provided `email` does not exist.
+   - The `password` is incorrect.
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Invalid email or password"
+   }
+   ```
+
+   - HTTP Status Code:
+     - `401 Unauthorized` for invalid email or password.
+     - `404 Not Found` for non-existent email.
+
+5. **JWT Token Errors**
+6. **Unauthorized Access**
+7. **Resource Not Found**
+
+8. **Internal Server Error**
+
+   Catches all unexpected server-side errors.
+
+   - Response:
+
+   ```json
+   {
+     "success": false,
+     "message": "Internal Server Error"
+   }
+   ```
+
+   - HTTP Status Code:`500 Internal Server Error`
