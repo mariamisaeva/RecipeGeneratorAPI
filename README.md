@@ -139,17 +139,124 @@ Response:
 - **Description**: Retrieves a list of recipes created by the authenticated user.
 - **Method**: `GET`
 - **Headers**: `Authorization: Bearer JWT_TOKEN`
-- **Endpoint**: `/users/user/:id`
+- **Endpoint**: `/users/user/:userId`
 - **Query Parameters**: `:userId`
 
 ```bash
-GET /users/user/:id
+GET /users/user/:userId
 ```
 
 Response:
 
 ```json
-
+{
+  "success": true,
+  "message": "User recipes retrieved successfully",
+  "data": [
+    {
+      "id": 1,
+      "title": "Delicious Pancakes",
+      "description": "Fluffy pancakes recipe.",
+      "isVegetarian": true,
+      "servings": 4,
+      "time": "20 minutes",
+      "image": "https://example.com/image.jpg",
+      "category": "breakfast",
+      "createdAt": "2024-12-21T10:00:00.000Z",
+      "updatedAt": "2024-12-21T10:00:00.000Z",
+      "author": {
+        "userId": "uuid",
+        "username": "exampleUser"
+      },
+      "ingredients": [
+        {
+          "ingredient": {
+            "id": 1,
+            "name": "Flour"
+          },
+          "quantity": 200,
+          "unit": "grams"
+        },
+        {
+          "ingredient": {
+            "id": 2,
+            "name": "Eggs"
+          },
+          "quantity": 2,
+          "unit": "pieces"
+        }
+      ],
+      "instructions": [
+        {
+          "instruction": {
+            "id": 1,
+            "step": "Mix flour and eggs."
+          }
+        },
+        {
+          "instruction": {
+            "id": 2,
+            "step": "Cook in a pan until golden brown."
+          }
+        }
+      ]
+    }
+  ]
+}
+{
+  "success": true,
+  "message": "User recipes retrieved successfully",
+  "data": [
+    {
+      "id": 1,
+      "title": "Delicious Pancakes",
+      "description": "Fluffy pancakes recipe.",
+      "isVegetarian": true,
+      "servings": 4,
+      "time": "20 minutes",
+      "image": "https://example.com/image.jpg",
+      "category": "breakfast",
+      "createdAt": "2024-12-21T10:00:00.000Z",
+      "updatedAt": "2024-12-21T10:00:00.000Z",
+      "author": {
+        "userId": "uuid",
+        "username": "exampleUser"
+      },
+      "ingredients": [
+        {
+          "ingredient": {
+            "id": 1,
+            "name": "Flour"
+          },
+          "quantity": 200,
+          "unit": "grams"
+        },
+        {
+          "ingredient": {
+            "id": 2,
+            "name": "Eggs"
+          },
+          "quantity": 2,
+          "unit": "pieces"
+        }
+      ],
+      "instructions": [
+        {
+          "instruction": {
+            "id": 1,
+            "step": "Mix flour and eggs."
+          }
+        },
+        {
+          "instruction": {
+            "id": 2,
+            "step": "Cook in a pan until golden brown."
+          }
+        }
+      ]
+    }
+  ]
+}
 ```
 
 <!--
