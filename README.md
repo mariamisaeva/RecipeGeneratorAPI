@@ -409,8 +409,66 @@ The following errors apply to all **User Endpoints** in the Recipe Generator API
      - `404 Not Found` for non-existent email.
 
 5. **JWT Token Errors**
+
+- Missing or Invalid Token:
+
+  - Occurs when the `Authorization` header is not provided or the token format is invalid.
+  - **Response**:
+
+  ```json
+  {
+    "success": false,
+    "message": "Access token is missing or invalid."
+  }
+  ```
+
+  - HTTP Status Code: `401 Unauthorized`
+
+- Expired or Invalid Token:
+
+  - Occurs when the provided token is expired or does not match the secret key.
+  - **Response**:
+
+  ```json
+  {
+    "success": false,
+    "message": "Token is invalid or expired."
+  }
+  ```
+
+  - HTTP Status Code: `403 Forbidden`
+
 6. **Unauthorized Access**
+
+   Occurs when a user tries to access resources they are not authorized to view or modify.
+
+   - **Example Scenario**:
+     - A user tries to fetch recipes belonging to another user.
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Unauthorized access."
+   }
+   ```
+
+   - HTTP Code: `403 Forbidden`
+
 7. **Resource Not Found**
+
+   Occurs when a resource (e.g., recipes for a user) does not exist in the database.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "No recipes found for this user."
+   }
+   ```
+
+   - HTTP Code: `404 Not Found`
 
 8. **Internal Server Error**
 
