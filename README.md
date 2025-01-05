@@ -638,12 +638,6 @@ GET /api/recipes?page=2&limit=5
 
 The following errors are common across both **User** and **Recipe** endpoints. These errors are handled consistently throughout the API:
 
-<!-- ### Error Handling for User Endpoints -->
-
-<!-- The following errors apply to all **User Endpoints** in the Recipe Generator API. Each section specifies unique scenarios and general patterns. -->
-
----
-
 ### Common Error Responses
 
 | **Error**                    | **Message**                           | **HTTP Code**  |
@@ -745,9 +739,43 @@ The following errors are common across both **User** and **Recipe** endpoints. T
 
    - HTTP Code: 401 Unauthorized
 
+6. **Expired or Invalid JWT Token**
+
+   Occurs when the provided token is expired or does not match the secret key.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Token is invalid or expired."
+   }
+   ```
+
+   - HTTP Code: `403 Forbidden`
+
+7. **Internal Server Error**
+
+   Catches all unexpected server-side errors.
+
+   - Response:
+
+   ```json
+   {
+     "success": false,
+     "message": "Internal Server Error"
+   }
+   ```
+
+   - HTTP Status Code:`500 Internal Server Error`
+
 ---
 
-3. **Missing Fields**
+### Error Handling for User Endpoints
+
+The following errors apply to all **User Endpoints** in the Recipe Generator API. Each section specifies unique scenarios and general patterns.
+
+1. **Missing Fields**
 
    This error occurs when required fields are missing in the request body.
 
@@ -764,7 +792,7 @@ The following errors are common across both **User** and **Recipe** endpoints. T
    }
    ```
 
-- HTTP Status Code: `400 Bad Request`
+   - HTTP Status Code: `400 Bad Request`
 
 2. **Duplicate User**
 
@@ -807,7 +835,7 @@ The following errors are common across both **User** and **Recipe** endpoints. T
 
    - HTTP Status Code: `400 Bad Request`
 
-4. **Invalid Email or Password**
+4. **Invalid Credentials**
 
    This error occurs during login when:
 
@@ -826,54 +854,45 @@ The following errors are common across both **User** and **Recipe** endpoints. T
      - `401 Unauthorized` for invalid email or password.
      - `404 Not Found` for non-existent email.
 
-5. **JWT Token Errors**
+5. **Unauthorized User Access**
 
-- Missing or Invalid Token:
+   Occurs when a user tries to access or modify another user's data.
 
-  - Occurs when the `Authorization` header is not provided or the token format is invalid.
-  - **Response**:
-
-  ```json
-  {
-    "success": false,
-    "message": "Access token is missing or invalid."
-  }
-  ```
-
-  - HTTP Status Code: `401 Unauthorized`
-
-- Expired or Invalid Token:
-
-  - Occurs when the provided token is expired or does not match the secret key.
-  - **Response**:
-
-  ```json
-  {
-    "success": false,
-    "message": "Token is invalid or expired."
-  }
-  ```
-
-  - HTTP Status Code: `403 Forbidden`
-
-8. **Internal Server Error**
-
-   Catches all unexpected server-side errors.
-
-   - Response:
+   - **Response**:
 
    ```json
    {
      "success": false,
-     "message": "Internal Server Error"
+     "message": "Unauthorized access."
    }
    ```
 
-   - HTTP Status Code:`500 Internal Server Error`
+   - HTTP Code: 403 Forbidden
+
+6. **Resource Not Found**
+
+   Occurs when no recipes are found for the specified user.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "No recipes found for this user."
+   }
+   ```
+
+   - HTTP Status Code: `404 Not Found`
 
 ### Error Handling for Recipe Endpoints
 
 The following errors apply to all **Recipe Endpoints** in the Recipe Generator API. Each section specifies unique scenarios and general patterns for handling errors.
+
+1. **Validation Errors**
+
+   Occurs when the recipe input data (e.g., title, category, ingredients) does not meet validation requirements.
+
+   - **Response**:
 
 ---
 
