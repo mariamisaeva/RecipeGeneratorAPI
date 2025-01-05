@@ -894,6 +894,68 @@ The following errors apply to all **Recipe Endpoints** in the Recipe Generator A
 
    - **Response**:
 
+   ```json
+   {
+     "success": false,
+     "message": "Validation failed",
+     "errors": [
+       {
+         "field": "field_name",
+         "message": "Validation error description"
+       }
+     ]
+   }
+   ```
+
+   - HTTP Code: `400 Bad Request`
+
+2. **Invalid Category**
+
+   Occurs when the provided category does not match the predefined categories.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Invalid category! Allowed  categories: [list_of_categories]."
+   }
+   ```
+
+   - HTTP Code: `400 Bad Request`
+
+3. **Unauthorized Recipe Access**
+
+   Occurs when a user tries to modify or delete a recipe that they do not own.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "You are not authorized to update/delete this recipe."
+   }
+   ```
+
+   - HTTP Code: `403 Forbidden`
+
+4. **Recipe Already Favorited**
+
+   Occurs when a user tries to favorite a recipe that is already in their favorites.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Recipe is already favorited."
+   }
+   ```
+
+   - HTTP Code: `400 Bad Request`
+
+5. **Recipe Not Found in Favorites**
+
 ---
 
 <!--
@@ -929,7 +991,7 @@ The following errors apply to all **Recipe Endpoints** in the Recipe Generator A
    }
    ```
 
-   - HTTP Code: `401 Unauthorized`
+- HTTP Code: `401 Unauthorized`
 
 2. **Missing or Invalid JWT Token**
 
