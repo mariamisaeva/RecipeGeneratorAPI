@@ -6,19 +6,19 @@
 2. [Authentication](#authentication)
 3. [Endpoints](#endpoints)
    - [1. User Endpoints](#1-user-endpoints)
-     - [1.1 Register User](#11-register-user)
-     - [1.2 Login User](#12-login-user)
-     - [1.3 Get Current User Profile](#13-get-current-user-profile)
-     - [1.4 Get Recipes By User](#14-get-recipes-by-user)
+     - [Register User](#11-register-user)
+     - [Login User](#12-login-user)
+     - [Get Current User Profile](#13-get-current-user-profile)
+     - [Get Recipes By User](#14-get-recipes-by-user)
    - [2. Recipe Endpoints](#2-recipe-endpoints)
-     - [Get All Recipes](#get-all-recipes)
-     - [Get Recipe By ID](#get-recipe-by-id)
-     - [Create Recipe](#create-recipe)
-     - [Update Recipe](#update-recipe)
-     - [Delete Recipe](#delete-recipe)
-     - [Add Favorite Recipe](#add-favorite-recipe)
-     - [Remove Favorite Recipe](#remove-favorite-recipe)
-     - [Get Favorite Recipes](#get-favorite-recipes)
+     - [Get All Recipes](#21-get-all-recipes)
+     - [Get Recipe By ID](#22-get-recipe-by-id)
+     - [Create Recipe](#23-create-recipe)
+     - [Update Recipe](#24-update-recipe)
+     - [Delete Recipe](#25-delete-recipe)
+     - [Get Favorite Recipes](#26-get-favorite-recipes)
+     - [Add Favorite Recipe](#27-add-favorite-recipe)
+     - [Remove Favorite Recipe](#28-remove-favorite-recipe)
 4. [Pagination](#pagination)
 5. [Error Handling](#error-handling)
 6. [Examples](#examples)
@@ -563,15 +563,88 @@ GET /api/recipes
 }
 ```
 
-## Error Handling
+---
 
-### Error Handling for User Endpoints
+## Pagination
 
-The following errors apply to all **User Endpoints** in the Recipe Generator API. Each section specifies unique scenarios and general patterns.
+### Description
+
+Pagination is used to retrieve a subset of results, particularly when dealing with large datasets. The Recipe Generator API supports pagination for endpoints like **Get All Recipes** and **Get Recipes By User**.
+
+### Query Parameters for Pagination
+
+| **Parameter** | **Type** | **Description**                      | **Default Value** |
+| ------------- | -------- | ------------------------------------ | ----------------- |
+| `page`        | `number` | Current page number                  | `1`               |
+| `limit`       | `number` | Number of items to retrieve per page | `6`               |
+
+### Example Request
+
+```bash
+GET /api/recipes?page=2&limit=5
+```
+
+### Example Response
+
+```json
+{
+  "success": true,
+  "message": "All recipes fetched",
+  "data": [
+    {
+      "id": 6,
+      "title": "Vegetable Soup",
+      "description": "A healthy vegetable soup recipe.",
+      "isVegetarian": true,
+      "servings": 4,
+      "time": "40 minutes",
+      "image": "https://example.com/image.jpg",
+      "category": "soup",
+      "ingredients": [
+        {
+          "ingredient": { "name": "Carrots" },
+          "quantity": 200,
+          "unit": "grams"
+        }
+      ],
+      "instructions": [
+        {
+          "instruction": { "step": "Chop vegetables and simmer." },
+          "stepNumber": 1
+        }
+      ],
+      "author": {
+        "userId": "uuid",
+        "username": "healthyEater"
+      },
+      "createdAt": "2023-12-21T10:00:00.000Z",
+      "updatedAt": "2023-12-21T10:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "total": 20,
+    "currentPage": 2,
+    "totalPages": 4,
+    "pageSize": 5
+  }
+}
+```
 
 ---
 
-## Common Error Responses
+## Error Handling
+
+### Common Error Patterns
+
+The following errors are common across both **User** and **Recipe** endpoints. These errors are handled consistently throughout the API:
+
+<!-- ### Error Handling for User Endpoints -->
+
+<!-- The following errors apply to all **User Endpoints** in the Recipe Generator API. Each section specifies unique scenarios and general patterns. -->
+
+---
+
+### Common Error Responses
 
 | **Error**                    | **Message**                           | **HTTP Code**  |
 | ---------------------------- | ------------------------------------- | -------------- |
@@ -589,7 +662,92 @@ The following errors apply to all **User Endpoints** in the Recipe Generator API
 
 ## Error Scenarios and Handling
 
-1. **Missing Fields**
+1. **Unauthorized Access**
+
+   Occurs when a user tries to access resources they are not authorized to view or modify.
+
+   - **Example Scenario**:
+     - A user tries to fetch recipes belonging to another user.
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Unauthorized access."
+   }
+   ```
+
+   - HTTP Code: `403 Forbidden`
+
+2. **Validation Errors**
+
+   Occurs when the input does not meet the specified requirements (e.g., invalid fields).
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Validation failed",
+     "errors": [
+       {
+         "field": "field_name",
+         "message": "Error message describing the   issue"
+       }
+     ]
+   }
+   ```
+
+   - HTTP Code: `400 Bad Request`
+
+3. **Resource Not Found**
+
+   Occurs when a resource (e.g., recipes for a user) does not exist in the database.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "No recipes found for this user."
+   }
+   ```
+
+   - HTTP Code: `404 Not Found`
+
+4. **Forbidden Access**
+
+   Occurs when the user is authenticated but not authorized to perform the requested action.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "You are not authorized to perform this action."
+   }
+   ```
+
+   - HTTP Code: `403 Forbidden`
+
+5. **Missing or Invalid JWT Token**
+
+   Occurs when the client does not provide a valid JWT token in the `Authorization` header.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Access token is missing or invalid."
+   }
+   ```
+
+   - HTTP Code: 401 Unauthorized
+
+---
+
+3. **Missing Fields**
 
    This error occurs when required fields are missing in the request body.
 
@@ -606,7 +764,7 @@ The following errors apply to all **User Endpoints** in the Recipe Generator API
    }
    ```
 
-   - HTTP Status Code: `400 Bad Request`
+- HTTP Status Code: `400 Bad Request`
 
 2. **Duplicate User**
 
@@ -698,38 +856,6 @@ The following errors apply to all **User Endpoints** in the Recipe Generator API
 
   - HTTP Status Code: `403 Forbidden`
 
-6. **Unauthorized Access**
-
-   Occurs when a user tries to access resources they are not authorized to view or modify.
-
-   - **Example Scenario**:
-     - A user tries to fetch recipes belonging to another user.
-   - **Response**:
-
-   ```json
-   {
-     "success": false,
-     "message": "Unauthorized access."
-   }
-   ```
-
-   - HTTP Code: `403 Forbidden`
-
-7. **Resource Not Found**
-
-   Occurs when a resource (e.g., recipes for a user) does not exist in the database.
-
-   - **Response**:
-
-   ```json
-   {
-     "success": false,
-     "message": "No recipes found for this user."
-   }
-   ```
-
-   - HTTP Code: `404 Not Found`
-
 8. **Internal Server Error**
 
    Catches all unexpected server-side errors.
@@ -744,3 +870,67 @@ The following errors apply to all **User Endpoints** in the Recipe Generator API
    ```
 
    - HTTP Status Code:`500 Internal Server Error`
+
+### Error Handling for Recipe Endpoints
+
+The following errors apply to all **Recipe Endpoints** in the Recipe Generator API. Each section specifies unique scenarios and general patterns for handling errors.
+
+---
+
+<!--
+### Common Error Responses
+
+| **Error**                       | **Message**                                     | **HTTP Code** |
+| ------------------------------- | ----------------------------------------------- | ------------- |
+| Unauthorized Access             | `Unauthorized access.`                          | `401`         |
+| Missing or Invalid JWT Token    | `Access token is missing or invalid.`           | `401`         |
+| Expired or Invalid JWT Token    | `Token is invalid or expired.`                  | `403`         |
+| Resource Not Found              | `Recipe not found.`                             | `404`         |
+| Resource Not Found in Favorites | `Recipe not found in favorites.`                | `404`         |
+| Validation Errors               | `Validation failed.`                            | `400`         |
+| Invalid Category                | `Invalid category! Allowed categories: [list]`  | `400`         |
+| Unauthorized Recipe Access      | `You are not authorized to update this recipe.` | `403`         |
+| Recipe Already Favorited        | `Recipe is already favorited.`                  | `400`         |
+| Internal Server Error           | `Internal server error.`                        | `500`         |
+
+---
+
+## Error Scenarios and Handling
+
+1. **Unauthorized Access**
+
+   Occurs when a user is not logged in or their token is invalid/missing.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Unauthorized access."
+   }
+   ```
+
+   - HTTP Code: `401 Unauthorized`
+
+2. **Missing or Invalid JWT Token**
+
+   Occurs when the `Authorization` header is not provided or the token format is invalid.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Access token is missing or invalid."
+   }
+   ```
+
+   - HTTP Code: `401 Unauthorized`
+
+3. **Expired or Invalid JWT Token**
+
+   Occurs when the provided token is expired or does not match the secret key.
+
+```
+
+``` -->
