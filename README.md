@@ -640,17 +640,13 @@ The following errors are common across both **User** and **Recipe** endpoints. T
 
 ### Common Error Responses
 
-| **Error**                    | **Message**                           | **HTTP Code**  |
-| ---------------------------- | ------------------------------------- | -------------- |
-| Missing Required Fields      | `All fields are required.`            | `400`          |
-| Validation Error             | `Validation failed.`                  | `400`          |
-| Duplicate User               | `User already exists.`                | `409`          |
-| Invalid Email or Password    | `Invalid email or password.`          | `401` or `404` |
-| Missing or Invalid JWT Token | `Access token is missing or invalid.` | `401`          |
-| Expired or Invalid JWT Token | `Token is invalid or expired.`        | `403`          |
-| Unauthorized Access          | `Unauthorized access.`                | `403`          |
-| Resource Not Found           | `No recipes found for this user.`     | `404`          |
-| Internal Server Error        | `Internal server error.`              | `500`          |
+| **Error**                    | **Message**                           | **HTTP Code** |
+| ---------------------------- | ------------------------------------- | ------------- |
+| Missing or Invalid JWT Token | `Access token is missing or invalid.` | `401`         |
+| Expired or Invalid JWT Token | `Token is invalid or expired.`        | `403`         |
+| Unauthorized Access          | `Unauthorized access.`                | `403`         |
+| Resource Not Found           | `Resource not found.`                 | `404`         |
+| Internal Server Error        | `Internal server error.`              | `500`         |
 
 ---
 
