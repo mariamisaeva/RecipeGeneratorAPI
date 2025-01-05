@@ -6,19 +6,19 @@
 2. [Authentication](#authentication)
 3. [Endpoints](#endpoints)
    - [1. User Endpoints](#1-user-endpoints)
-     - [1.1 Register User](#11-register-user)
-     - [1.2 Login User](#12-login-user)
-     - [1.3 Get Current User Profile](#13-get-current-user-profile)
-     - [1.4 Get Recipes By User](#14-get-recipes-by-user)
-   - [Recipes](#recipes)
-     - [Get All Recipes](#get-all-recipes)
-     - [Get Recipe By ID](#get-recipe-by-id)
-     - [Create Recipe](#create-recipe)
-     - [Update Recipe](#update-recipe)
-     - [Delete Recipe](#delete-recipe)
-     - [Add Favorite Recipe](#add-favorite-recipe)
-     - [Remove Favorite Recipe](#remove-favorite-recipe)
-     - [Get Favorite Recipes](#get-favorite-recipes)
+     - [Register User](#11-register-user)
+     - [Login User](#12-login-user)
+     - [Get Current User Profile](#13-get-current-user-profile)
+     - [Get Recipes By User](#14-get-recipes-by-user)
+   - [2. Recipe Endpoints](#2-recipe-endpoints)
+     - [Get All Recipes](#21-get-all-recipes)
+     - [Get Recipe By ID](#22-get-recipe-by-id)
+     - [Create Recipe](#23-create-recipe)
+     - [Update Recipe](#24-update-recipe)
+     - [Delete Recipe](#25-delete-recipe)
+     - [Get Favorite Recipes](#26-get-favorite-recipes)
+     - [Add Favorite Recipe](#27-add-favorite-recipe)
+     - [Remove Favorite Recipe](#28-remove-favorite-recipe)
 4. [Pagination](#pagination)
 5. [Error Handling](#error-handling)
 6. [Examples](#examples)
@@ -259,75 +259,517 @@ Response:
 }
 ```
 
-<!--
 ## 2. Recipe Endpoints
+
+The Recipe Endpoints allow users to perform CRUD (Create, Read, Update, Delete) operations on recipes. Additionally, users can manage their favorite recipes.
 
 ### 2.1 Get All Recipes
 
-```c
+- **Description**: Fetches all recipes with optional query filters and pagination.
+- **Method**: `GET`
+- **Endpoint**: `/api/recipes`
+
+```bash
+GET /api/recipes
+```
+
+- **Query Parameters**:
+
+| Parameter      | Type      | Description                                            |
+| -------------- | --------- | ------------------------------------------------------ |
+| `keyword`      | `string`  | Search term to filter recipes by title or description. |
+| `page`         | `number`  | Current page for pagination (default: 1).              |
+| `limit`        | `number`  | Number of recipes per page (default: 6).               |
+| `category`     | `string`  | Filter recipes by category (e.g., `dinner`).           |
+| `isVegetarian` | `boolean` | Filter recipes by vegetarian status.                   |
+| `time`         | `number`  | Filter recipes by time required (in minutes).          |
+
+- **Response**:
+
+```json
 {
   "success": true,
   "message": "All recipes fetched",
   "data": [
     {
       "id": 1,
-      "title": "Vegetarian Pasta",
-      "description": "A delicious vegetarian pasta recipe.",
+      "title": "Pasta",
+      "description": "Delicious pasta recipe",
       "isVegetarian": true,
       "servings": 4,
-      "time": 30,
-      "image": "https://example.com/image1.jpg",
+      "time": "30 minutes",
+      "image": "https://example.com/image.jpg",
       "category": "dinner",
       "ingredients": [
-        { "id": 1, "name": "Pasta", "quantity": "200g" },
-        { "id": 2, "name": "Tomato Sauce", "quantity": "100ml" }
+        { "ingredient": { "name": "Pasta" }, "quantity": 200, "unit": "grams" }
       ],
       "instructions": [
-        { "id": 1, "step": "Boil the pasta." },
-        { "id": 2, "step": "Mix with tomato sauce." }
+        { "instruction": { "step": "Boil pasta." }, "stepNumber": 1 }
       ],
       "author": {
-        "userId": 10,
-        "username": "ChefJohn"
+        "userId": "uuid",
+        "username": "exampleUser"
       },
-      "createdAt": "2025-01-01T10:00:00.000Z",
-      "updatedAt": "2025-01-01T12:00:00.000Z"
+      "createdAt": "2023-12-30T12:00:00Z",
+      "updatedAt": "2023-12-30T12:00:00Z"
     }
   ],
   "pagination": {
-    "total": 30,
-    "currentPage": 2,
-    "totalPages": 6,
-    "pageSize": 5
+    "total": 20,
+    "currentPage": 1,
+    "totalPages": 4,
+    "pageSize": 6
   }
 }
-``` -->
+```
 
-## Error Handling
+### 2.2 Get Recipe By ID
 
-### Error Handling for User Endpoints
+- **Description**: Fetches a specific recipe by its ID.
+- **Method**: `GET`
+- **Endpoint**: `/api/recipes/:id`
+- **Path Parameter**:
 
-The following errors apply to all **User Endpoints** in the Recipe Generator API. Each section specifies unique scenarios and general patterns.
+| Parameter | Type     | Description          |
+| --------- | -------- | -------------------- |
+| `id`      | `number` | The ID of the recipe |
+
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Getting recipe by id...",
+  "data": {
+    "id": 1,
+    "title": "Pasta",
+    "description": "Delicious pasta recipe",
+    "isVegetarian": true,
+    "servings": 4,
+    "time": "30 minutes",
+    "image": "https://example.com/image.jpg",
+    "category": "dinner",
+    "ingredients": [
+      { "ingredient": { "name": "Pasta" }, "quantity": 200, "unit": "grams" }
+    ],
+    "instructions": [
+      { "instruction": { "step": "Boil pasta." }, "stepNumber": 1 }
+    ],
+    "author": {
+      "userId": "uuid",
+      "username": "exampleUser"
+    },
+    "createdAt": "2023-12-30T12:00:00Z",
+    "updatedAt": "2023-12-30T12:00:00Z"
+  }
+}
+```
+
+### 2.3 Create Recipe
+
+- **Description**: Creates a new recipe.
+- **Method**: `POST`
+- **Endpoint**: `/api/recipes/create-recipe`
+- **Headers**:Requires `Authorization: Bearer JWT_TOKEN.`
+- **Request Body**:
+
+```json
+{
+  "title": "Pasta",
+  "description": "Delicious pasta recipe",
+  "isVegetarian": true,
+  "servings": 4,
+  "time": "30 minutes",
+  "image": "https://example.com/image.jpg",
+  "category": "dinner",
+  "ingredients": [
+    { "ingredient": { "name": "Pasta" }, "quantity": 200, "unit": "grams" }
+  ],
+  "instructions": [
+    { "instruction": { "step": "Boil pasta." }, "stepNumber": 1 }
+  ]
+}
+```
+
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Recipe created successfully",
+  "data": {
+    "id": 1,
+    "title": "Pasta",
+    "description": "Delicious pasta recipe",
+    "isVegetarian": true,
+    "servings": 4,
+    "time": "30 minutes",
+    "image": "https://example.com/image.jpg",
+    "category": "dinner",
+    "ingredients": [
+      { "ingredient": { "name": "Pasta" }, "quantity": 200, "unit": "grams" }
+    ],
+    "instructions": [
+      { "instruction": { "step": "Boil pasta." }, "stepNumber": 1 }
+    ],
+    "author": {
+      "userId": "uuid",
+      "username": "exampleUser"
+    },
+    "createdAt": "2023-12-30T12:00:00Z",
+    "updatedAt": "2023-12-30T12:00:00Z"
+  }
+}
+```
+
+### 2.4 Update Recipe
+
+- **Description**: Updates an existing recipe.
+- **Method**: `PUT`
+- **Endpoint**: `/api/recipes/edit/:id`
+- **Headers**: Requires `Authorization: Bearer JWT_TOKEN.`
+- **Request Body**:
+
+```json
+{
+  "title": "Updated Pasta Recipe",
+  "description": "Updated description",
+  "isVegetarian": false,
+  "servings": 6,
+  "time": "45 minutes",
+  "image": "https://example.com/image-updated.jpg",
+  "category": "lunch",
+  "ingredients": [
+    { "ingredient": { "name": "Cheese" }, "quantity": 50, "unit": "grams" }
+  ],
+  "instructions": [
+    { "instruction": { "step": "Add cheese to pasta." }, "stepNumber": 2 }
+  ]
+}
+```
+
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Recipe updated successfully",
+  "data": {
+    "id": 1,
+    "title": "Updated Pasta Recipe",
+    "description": "Updated description",
+    "isVegetarian": false,
+    "servings": 6,
+    "time": "45 minutes",
+    "image": "https://example.com/image-updated.jpg",
+    "category": "lunch",
+    "ingredients": [
+      { "ingredient": { "name": "Cheese" }, "quantity": 50, "unit": "grams" }
+    ],
+    "instructions": [
+      { "instruction": { "step": "Add cheese to pasta." }, "stepNumber": 2 }
+    ],
+    "author": {
+      "userId": "uuid",
+      "username": "exampleUser"
+    },
+    "createdAt": "2023-12-30T12:00:00Z",
+    "updatedAt": "2023-12-30T12:00:00Z"
+  }
+}
+```
+
+### 2.5 Delete Recipe
+
+- **Description**: Deletes an existing recipe.
+- **Method**: `DELETE`
+- **Endpoint**: `/api/recipes/:id`
+- **Headers**: Requires `Authorization: Bearer JWT_TOKEN.`
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Recipe [Recipe Title] deleted successfully"
+}
+```
+
+### 2.6 Get Favorite Recipes
+
+- **Description**: Retrieves the user's favorite recipes.
+- **Method**: `GET`
+- **Endpoint**:`/api/recipes/favorites`
+- **Headers**: Requires `Authorization: Bearer JWT_TOKEN.`
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Favorite recipes fetched",
+  "data": [
+    {
+      "id": 1,
+      "title": "Pasta",
+      "description": "Delicious pasta recipe",
+      "isVegetarian": true,
+      "servings": 4,
+      "time": "30 minutes",
+      "image": "https://example.com/image.jpg",
+      "category": "dinner",
+      "favCounter": 10,
+      "ingredients": [
+        { "ingredient": { "name": "Pasta" }, "quantity": 200, "unit": "grams" }
+      ],
+      "instructions": [
+        { "instruction": { "step": "Boil pasta." }, "stepNumber": 1 }
+      ],
+      "author": {
+        "userId": "uuid",
+        "username": "exampleUser"
+      },
+      "createdAt": "2023-12-30T12:00:00Z"
+    }
+  ]
+}
+```
+
+### 2.7 Add Favorite Recipe
+
+- **Description**: Adds a recipe to the user's favorites.
+- **Method**: `POST`
+- **Endpoint**: `/api/recipes/:id/favorite`
+- **Headers**: Requires `Authorization: Bearer JWT_TOKEN.`
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Recipe [Recipe Title] added to favorites"
+}
+```
+
+### 2.8 Remove Favorite Recipe
+
+- **Description**: Removes a recipe from the user's favorites.
+- **Method**: `DELETE`
+- **Endpoint**: `/api/recipes/:id/favorite`
+- **Headers**: Requires `Authorization: Bearer JWT_TOKEN.`
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Recipe [Recipe Title] removed from favorites"
+}
+```
 
 ---
 
-## Common Error Responses
+## Pagination
 
-| **Error**                    | **Message**                           | **HTTP Code**  |
-| ---------------------------- | ------------------------------------- | -------------- |
-| Missing Required Fields      | `All fields are required.`            | `400`          |
-| Validation Error             | `Validation failed.`                  | `400`          |
-| Duplicate User               | `User already exists.`                | `409`          |
-| Invalid Email or Password    | `Invalid email or password.`          | `401` or `404` |
-| Missing or Invalid JWT Token | `Access token is missing or invalid.` | `401`          |
-| Expired or Invalid JWT Token | `Token is invalid or expired.`        | `403`          |
-| Unauthorized Access          | `Unauthorized access.`                | `403`          |
-| Resource Not Found           | `No recipes found for this user.`     | `404`          |
-| Internal Server Error        | `Internal server error.`              | `500`          |
+### Description
+
+Pagination is used to retrieve a subset of results, particularly when dealing with large datasets. The Recipe Generator API supports pagination for endpoints like **Get All Recipes** and **Get Recipes By User**.
+
+### Query Parameters for Pagination
+
+| **Parameter** | **Type** | **Description**                      | **Default Value** |
+| ------------- | -------- | ------------------------------------ | ----------------- |
+| `page`        | `number` | Current page number                  | `1`               |
+| `limit`       | `number` | Number of items to retrieve per page | `6`               |
+
+### Example Request
+
+```bash
+GET /api/recipes?page=2&limit=5
+```
+
+### Example Response
+
+```json
+{
+  "success": true,
+  "message": "All recipes fetched",
+  "data": [
+    {
+      "id": 6,
+      "title": "Vegetable Soup",
+      "description": "A healthy vegetable soup recipe.",
+      "isVegetarian": true,
+      "servings": 4,
+      "time": "40 minutes",
+      "image": "https://example.com/image.jpg",
+      "category": "soup",
+      "ingredients": [
+        {
+          "ingredient": { "name": "Carrots" },
+          "quantity": 200,
+          "unit": "grams"
+        }
+      ],
+      "instructions": [
+        {
+          "instruction": { "step": "Chop vegetables and simmer." },
+          "stepNumber": 1
+        }
+      ],
+      "author": {
+        "userId": "uuid",
+        "username": "healthyEater"
+      },
+      "createdAt": "2023-12-21T10:00:00.000Z",
+      "updatedAt": "2023-12-21T10:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "total": 20,
+    "currentPage": 2,
+    "totalPages": 4,
+    "pageSize": 5
+  }
+}
+```
+
+---
+
+## Error Handling
+
+### Common Error Patterns
+
+The following errors are common across both **User** and **Recipe** endpoints. These errors are handled consistently throughout the API:
+
+### Common Error Responses
+
+| **Error**                    | **Message**                           | **HTTP Code** |
+| ---------------------------- | ------------------------------------- | ------------- |
+| Missing or Invalid JWT Token | `Access token is missing or invalid.` | `401`         |
+| Expired or Invalid JWT Token | `Token is invalid or expired.`        | `403`         |
+| Unauthorized Access          | `Unauthorized access.`                | `403`         |
+| Resource Not Found           | `Resource not found.`                 | `404`         |
+| Internal Server Error        | `Internal server error.`              | `500`         |
 
 ---
 
 ## Error Scenarios and Handling
+
+1. **Unauthorized Access**
+
+   Occurs when a user tries to access resources they are not authorized to view or modify.
+
+   - **Example Scenario**:
+     - A user tries to fetch recipes belonging to another user.
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Unauthorized access."
+   }
+   ```
+
+   - HTTP Code: `403 Forbidden`
+
+2. **Validation Errors**
+
+   Occurs when the input does not meet the specified requirements (e.g., invalid fields).
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Validation failed",
+     "errors": [
+       {
+         "field": "field_name",
+         "message": "Error message describing the   issue"
+       }
+     ]
+   }
+   ```
+
+   - HTTP Code: `400 Bad Request`
+
+3. **Resource Not Found**
+
+   Occurs when a resource (e.g., recipes for a user) does not exist in the database.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "No recipes found for this user."
+   }
+   ```
+
+   - HTTP Code: `404 Not Found`
+
+4. **Forbidden Access**
+
+   Occurs when the user is authenticated but not authorized to perform the requested action.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "You are not authorized to perform this action."
+   }
+   ```
+
+   - HTTP Code: `403 Forbidden`
+
+5. **Missing or Invalid JWT Token**
+
+   Occurs when the client does not provide a valid JWT token in the `Authorization` header.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Access token is missing or invalid."
+   }
+   ```
+
+   - HTTP Code: 401 Unauthorized
+
+6. **Expired or Invalid JWT Token**
+
+   Occurs when the provided token is expired or does not match the secret key.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Token is invalid or expired."
+   }
+   ```
+
+   - HTTP Code: `403 Forbidden`
+
+7. **Internal Server Error**
+
+   Catches all unexpected server-side errors.
+
+   - Response:
+
+   ```json
+   {
+     "success": false,
+     "message": "Internal Server Error"
+   }
+   ```
+
+   - HTTP Status Code:`500 Internal Server Error`
+
+---
+
+### Error Handling for User Endpoints
+
+The following errors apply to all **User Endpoints** in the Recipe Generator API. Each section specifies unique scenarios and general patterns.
 
 1. **Missing Fields**
 
@@ -389,7 +831,7 @@ The following errors apply to all **User Endpoints** in the Recipe Generator API
 
    - HTTP Status Code: `400 Bad Request`
 
-4. **Invalid Email or Password**
+4. **Invalid Credentials**
 
    This error occurs during login when:
 
@@ -408,42 +850,10 @@ The following errors apply to all **User Endpoints** in the Recipe Generator API
      - `401 Unauthorized` for invalid email or password.
      - `404 Not Found` for non-existent email.
 
-5. **JWT Token Errors**
+5. **Unauthorized User Access**
 
-- Missing or Invalid Token:
+   Occurs when a user tries to access or modify another user's data.
 
-  - Occurs when the `Authorization` header is not provided or the token format is invalid.
-  - **Response**:
-
-  ```json
-  {
-    "success": false,
-    "message": "Access token is missing or invalid."
-  }
-  ```
-
-  - HTTP Status Code: `401 Unauthorized`
-
-- Expired or Invalid Token:
-
-  - Occurs when the provided token is expired or does not match the secret key.
-  - **Response**:
-
-  ```json
-  {
-    "success": false,
-    "message": "Token is invalid or expired."
-  }
-  ```
-
-  - HTTP Status Code: `403 Forbidden`
-
-6. **Unauthorized Access**
-
-   Occurs when a user tries to access resources they are not authorized to view or modify.
-
-   - **Example Scenario**:
-     - A user tries to fetch recipes belonging to another user.
    - **Response**:
 
    ```json
@@ -453,11 +863,11 @@ The following errors apply to all **User Endpoints** in the Recipe Generator API
    }
    ```
 
-   - HTTP Code: `403 Forbidden`
+   - HTTP Code: 403 Forbidden
 
-7. **Resource Not Found**
+6. **Resource Not Found**
 
-   Occurs when a resource (e.g., recipes for a user) does not exist in the database.
+   Occurs when no recipes are found for the specified user.
 
    - **Response**:
 
@@ -468,19 +878,162 @@ The following errors apply to all **User Endpoints** in the Recipe Generator API
    }
    ```
 
-   - HTTP Code: `404 Not Found`
+   - HTTP Status Code: `404 Not Found`
 
-8. **Internal Server Error**
+### Error Handling for Recipe Endpoints
 
-   Catches all unexpected server-side errors.
+The following errors apply to all **Recipe Endpoints** in the Recipe Generator API. Each section specifies unique scenarios and general patterns for handling errors.
 
-   - Response:
+1. **Validation Errors**
+
+   Occurs when the recipe input data (e.g., title, category, ingredients) does not meet validation requirements.
+
+   - **Response**:
 
    ```json
    {
      "success": false,
-     "message": "Internal Server Error"
+     "message": "Validation failed",
+     "errors": [
+       {
+         "field": "field_name",
+         "message": "Validation error description"
+       }
+     ]
    }
    ```
 
-   - HTTP Status Code:`500 Internal Server Error`
+   - HTTP Code: `400 Bad Request`
+
+2. **Invalid Category**
+
+   Occurs when the provided category does not match the predefined categories.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Invalid category! Allowed  categories: [list_of_categories]."
+   }
+   ```
+
+   - HTTP Code: `400 Bad Request`
+
+3. **Unauthorized Recipe Access**
+
+   Occurs when a user tries to modify or delete a recipe that they do not own.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "You are not authorized to update/delete this recipe."
+   }
+   ```
+
+   - HTTP Code: `403 Forbidden`
+
+4. **Recipe Already Favorited**
+
+   Occurs when a user tries to favorite a recipe that is already in their favorites.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Recipe is already favorited."
+   }
+   ```
+
+   - HTTP Code: `400 Bad Request`
+
+5. **Recipe Not Found in Favorites**
+
+   Occurs when a user tries to remove a recipe from favorites that is not present in their favorites.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Recipe not found in favorites."
+   }
+   ```
+
+   - HTTP Code: `404 Not Found`
+
+6. **Resource Not Found**
+
+   Occurs when the requested recipe does not exist.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Recipe not found."
+   }
+   ```
+
+---
+
+<!--
+### Common Error Responses
+
+| **Error**                       | **Message**                                     | **HTTP Code** |
+| ------------------------------- | ----------------------------------------------- | ------------- |
+| Unauthorized Access             | `Unauthorized access.`                          | `401`         |
+| Missing or Invalid JWT Token    | `Access token is missing or invalid.`           | `401`         |
+| Expired or Invalid JWT Token    | `Token is invalid or expired.`                  | `403`         |
+| Resource Not Found              | `Recipe not found.`                             | `404`         |
+| Resource Not Found in Favorites | `Recipe not found in favorites.`                | `404`         |
+| Validation Errors               | `Validation failed.`                            | `400`         |
+| Invalid Category                | `Invalid category! Allowed categories: [list]`  | `400`         |
+| Unauthorized Recipe Access      | `You are not authorized to update this recipe.` | `403`         |
+| Recipe Already Favorited        | `Recipe is already favorited.`                  | `400`         |
+| Internal Server Error           | `Internal server error.`                        | `500`         |
+
+---
+
+## Error Scenarios and Handling
+
+1. **Unauthorized Access**
+
+   Occurs when a user is not logged in or their token is invalid/missing.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Unauthorized access."
+   }
+   ```
+
+- HTTP Code: `401 Unauthorized`
+
+2. **Missing or Invalid JWT Token**
+
+   Occurs when the `Authorization` header is not provided or the token format is invalid.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Access token is missing or invalid."
+   }
+   ```
+
+   - HTTP Code: `401 Unauthorized`
+
+3. **Expired or Invalid JWT Token**
+
+   Occurs when the provided token is expired or does not match the secret key.
+
+```
+
+``` -->
