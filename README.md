@@ -956,6 +956,32 @@ The following errors apply to all **Recipe Endpoints** in the Recipe Generator A
 
 5. **Recipe Not Found in Favorites**
 
+   Occurs when a user tries to remove a recipe from favorites that is not present in their favorites.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Recipe not found in favorites."
+   }
+   ```
+
+   - HTTP Code: `404 Not Found`
+
+6. **Resource Not Found**
+
+   Occurs when the requested recipe does not exist.
+
+   - **Response**:
+
+   ```json
+   {
+     "success": false,
+     "message": "Recipe not found."
+   }
+   ```
+
 ---
 
 <!--
